@@ -1,0 +1,31 @@
+{
+  "name": "mbed-mesh-api",
+  "version": "0.0.0",
+  "description": "Mesh networking interface",
+  "keywords": [
+    "Mesh",
+    "6LoWPAN",
+    "Thread"
+  ],
+  "author": "Arto Kinnunen <arto.kinnunen@arm.com>",
+  "repository": {
+    "url": "git@github.com:ARMmbed/mbed-mesh-api.git",
+    "type": "git"
+  },
+  "homepage": "https://github.com/ARMmbed/mbed-mesh-api",
+  "licenses": [
+    {
+      "url": "https://spdx.org/licenses/Apache-2.0",
+      "type": "Apache-2.0"
+    }
+  ],
+  "private": true,
+  "dependencies": {
+    "mbed-core": "~0.1.1",
+    "mbed-6lowpan": "~0.0.10",
+    "mbed-client-libservice": "~2.0.9",
+	"atmel-rf-driver": "~0.0.9"
+  },
+  "testDependencies": {},
+  "targetDependencies": {}
+}
