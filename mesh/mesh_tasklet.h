@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 /*
- * \brief Read own IP address
+ * \brief Read own global IP address
  *
  * \param address where own ip address will be written
  * \param len length of provided address buffer
@@ -39,7 +39,7 @@ int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len);
  * \param callback to be called when network state changes
  * \param nwk_interface_id to use for networking
  *
- * \return 0 on success
+ * \return >= 0 on success
  * \return -1 if callback function is used in another tasklet
  * \return -2 if memory allocation fails
  */

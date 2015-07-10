@@ -22,14 +22,13 @@ public:
 
     /*
      * \brief Initialization of the interface.
-     * \param description is the name for the interface
      * \param registered device is physical device registered
      * \param callback_func is callback that is called when network state changes
      * \return >=0 on success.
      * \return -2 Driver is already associated to other interface.
      * \return -3 No memory for interface.
      */
-    int8_t init(const char *interface_name, int8_t registered_device_id, mesh_interface_cb callback_func);
+    int8_t init(int8_t registered_device_id, mesh_interface_cb callback_func);
 
     // methods from the abstract class
     int8_t init();
@@ -37,7 +36,7 @@ public:
     int8_t disconnect();
 
     /**
-     * \brief Read own IP address
+     * \brief Read own global IP address
      *
      * \param address is where the IP address will be copied
      * \param len is the length of the address buffer, must be at least 40 bytes
@@ -54,19 +53,9 @@ public:
 
 private:
     /*
-     * Description for the interface
-     */
-    const char *description;
-
-    /*
      * Registered device ID
      */
     int8_t device_id;
-
-    /*
-     * Network interface ID
-     */
-    int8_t network_interface_id;
 };
 
 #endif /* __MESH6LOWPAN_ND_H_ */

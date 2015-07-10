@@ -10,17 +10,29 @@ extern "C" {
 #endif
 
 /*
- * Network status codes
+ * Network connection status codes
  */
 typedef enum {
-    MESH_CONNECTED = 0,
-    MESH_DISCONNECTED
-} mesh_status_t;
+    MESH_ERROR_NONE = 0,    /*<! No error */
+    MESH_ERROR_UNKOWN,      /*<! Unspecified error */
+    MESH_ERROR_MEMORY,      /*<! Memory error */
+    MESH_ERROR_PARAM,       /*<! Illegal parameter */
+} mesh_error_t;
+
+/*
+ * Network connection status codes
+ */
+typedef enum {
+    MESH_CONNECTED = 0,             /*<! connected to network */
+    MESH_DISCONNECTED,              /*<! disconnected from network */
+    MESH_BOOTSTRAP_START_FAILED,    /*<! error during bootstrap start */
+    MESH_BOOTSTRAP_FAILED           /*<! error in bootstrap */
+} mesh_connection_status_t;
 
 /**
  * Type of the network status callback
  */
-typedef void (*mesh_interface_cb)(mesh_status_t mesh_status);
+typedef void (*mesh_interface_cb)(mesh_connection_status_t mesh_status);
 
 
 #ifdef __cplusplus

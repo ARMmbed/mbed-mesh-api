@@ -16,11 +16,8 @@
 
 #define TRACE_GROUP  "m6lpND"
 
-Mesh6LoWPAN_ND::Mesh6LoWPAN_ND() :
-        description(NULL), device_id(0), network_interface_id(-1)
+Mesh6LoWPAN_ND::Mesh6LoWPAN_ND() : device_id(-1)
 {
-    // initialize mesh networking resources, memory, timers, etc...
-    mesh_tasklet_system_init();
 }
 
 Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
@@ -29,15 +26,27 @@ Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
     tr_debug("~Mesh6LoWPAN()");
 }
 
-int8_t Mesh6LoWPAN_ND::init(const char *interface_name, int8_t registered_device_id, mesh_interface_cb callback_func)
+int8_t Mesh6LoWPAN_ND::init(int8_t registered_device_id, mesh_interface_cb callback_func)
 {
     tr_debug("init()");
-    description = interface_name;
     device_id = registered_device_id;
     callback = callback_func;
     // Create network interface
-    network_interface_id = mesh_tasklet_network_init((char*)description, device_id);
-    return network_interface_id;
+    network_interface_id = mesh_tasklet_network_init((char*)"6LoWPAN_ND", device_id);
+    if (network_interface_id >= 0)
+    {
+        return MESH_ERROR_NONE;
+    }
+    else if (network_interface_id == -2)
+    {
+        return MESH_ERROR_PARAM;
+    }
+    else if (network_interface_id == -3)
+    {
+        return MESH_ERROR_MEMORY;
+    }
+
+    return MESH_ERROR_UNKOWN;
 }
 
 int8_t Mesh6LoWPAN_ND::init()
@@ -48,8 +57,25 @@ int8_t Mesh6LoWPAN_ND::init()
 
 int8_t Mesh6LoWPAN_ND::connect(void)
 {
+    int8_t status;
     tr_debug("connect()");
-    return mesh_tasklet_start(callback, network_interface_id);
+    status = mesh_tasklet_start(callback, network_interface_id);
+    if (status >= 0)
+    {
+        return MESH_ERROR_NONE;
+    }
+    else if (status == -1)
+    {
+        return MESH_ERROR_PARAM;
+    }
+    else if (status == -2)
+    {
+        return MESH_ERROR_MEMORY;
+    }
+    else
+    {
+        return MESH_ERROR_UNKOWN;
+    }
 }
 
 int8_t Mesh6LoWPAN_ND::disconnect(void)
