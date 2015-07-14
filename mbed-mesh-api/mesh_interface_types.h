@@ -14,8 +14,9 @@ extern "C" {
  */
 typedef enum {
     MESH_ERROR_NONE = 0,    /*<! No error */
-    MESH_ERROR_UNKOWN,      /*<! Unspecified error */
+    MESH_ERROR_UNKNOWN,     /*<! Unspecified error */
     MESH_ERROR_MEMORY,      /*<! Memory error */
+    MESH_ERROR_STATE,       /*<! Illegal state */
     MESH_ERROR_PARAM,       /*<! Illegal parameter */
 } mesh_error_t;
 

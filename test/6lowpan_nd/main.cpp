@@ -24,7 +24,7 @@ int main() {
     printf("Mesh API test application");
 
     // create 6LoWPAN_ND interface
-    meshApi = new Mesh6LoWPAN_ND();
+    meshApi = Mesh6LoWPAN_ND::getInstance();
 
     // initialize the interface with registered device and callback
     status = meshApi->init(rf_device_register(), mesh_api_callback);
@@ -48,13 +48,13 @@ int main() {
         meshApi->processEvent();
     } while (network_state != MESH_CONNECTED);
 
-    printf("Connected to mesh network!");
+    printf("Connected to mesh network, disconnecting...!");
 
     meshApi->disconnect();
-//    do
-//    {
-//        meshApi->processEvent();
-//    } while(network_state != MESH_DISCONNECTED);
+    do
+    {
+        meshApi->processEvent();
+    } while(network_state != MESH_DISCONNECTED);
 
     delete meshApi;
 

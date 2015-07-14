@@ -34,7 +34,7 @@ int8_t mesh_tasklet_get_ip_address(char *address, int8_t len);
 int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len);
 
 /*
- * \brief Start Mesh networking state machine
+ * \brief Connect to mesh network
  *
  * \param callback to be called when network state changes
  * \param nwk_interface_id to use for networking
@@ -42,8 +42,9 @@ int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len);
  * \return >= 0 on success
  * \return -1 if callback function is used in another tasklet
  * \return -2 if memory allocation fails
+ * \return -3 if network is already connected
  */
-int8_t mesh_tasklet_start(mesh_interface_cb callback, int8_t nwk_interface_id);
+int8_t mesh_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id);
 
 /*
  * \brief Handle events to keep network operational.
@@ -61,11 +62,18 @@ void mesh_tasklet_system_init();
 /*
  * \brief Create network interface.
  *
- * \param description name for the interface
  * \param device_id registered physical device
  * \return interface ID that can be used to communication with this interface
  */
-int8_t mesh_tasklet_network_init(char *description, int8_t device_id);
+int8_t mesh_tasklet_network_init(int8_t device_id);
+
+/*
+ * \brief Disconnect network interface.
+ *
+ * \return >= 0 if disconnected successfully.
+ * \return < 0 in case of errors
+ */
+int8_t mesh_tasklet_disconnect();
 
 #ifdef __cplusplus
 }
