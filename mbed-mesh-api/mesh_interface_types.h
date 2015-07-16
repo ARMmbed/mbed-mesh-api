@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 /*
- * Network connection status codes
+ * Error status values returned by Mesh network API.
  */
 typedef enum {
     MESH_ERROR_NONE = 0,    /*<! No error */
@@ -21,7 +21,7 @@ typedef enum {
 } mesh_error_t;
 
 /*
- * Network connection status codes
+ * Mesh network connection status codes returned in callback.
  */
 typedef enum {
     MESH_CONNECTED = 0,             /*<! connected to network */

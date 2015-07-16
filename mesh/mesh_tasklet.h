@@ -14,7 +14,7 @@ extern "C" {
 /*
  * \brief Read own global IP address
  *
- * \param address where own ip address will be written
+ * \param address where own IP address will be written
  * \param len length of provided address buffer
  *
  * \return 0 on success
@@ -25,7 +25,7 @@ int8_t mesh_tasklet_get_ip_address(char *address, int8_t len);
 /*
  * \brief Read border router IP address
  *
- * \param address where own ip address will be written
+ * \param address where router IP address will be written
  * \param len length of provided address buffer
  *
  * \return 0 on success

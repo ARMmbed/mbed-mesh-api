@@ -59,9 +59,8 @@ int mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
         {
             mesh_api->processEvent();
         } while (mesh_network_state != MESH_DISCONNECTED);
-
-        delete mesh_api;
     }
+    delete mesh_api;
     TEST_RETURN();
 }
 

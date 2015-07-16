@@ -24,7 +24,7 @@
     "mbed-core": "~0.1.1",
     "mbed-6lowpan": "~0.0.10",
     "mbed-6lowpan-adaptor": "~0.0.5",
-    "mbed-client-libservice": "~2.0.9"
+    "mbed-client-libservice": "~3.0.1"
   },
   "testDependencies": {
     "atmel-rf-driver": "~0.0.9"
