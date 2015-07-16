@@ -9,9 +9,9 @@
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
 
-static mesh_status_t network_state = MESH_DISCONNECTED;
+static mesh_connection_status_t network_state = MESH_DISCONNECTED;
 
-void mesh_api_callback(mesh_status_t mesh_status)
+void mesh_api_callback(mesh_connection_status_t mesh_status)
 {
     printf("mesh_api_callback %d", mesh_status);
     network_state = mesh_status;
@@ -24,10 +24,10 @@ int main() {
     printf("Mesh API test application");
 
     // create 6LoWPAN_ND interface
-    meshApi = new Mesh6LoWPAN_ND();
+    meshApi = Mesh6LoWPAN_ND::getInstance();
 
-    // initialize the interface
-    status = meshApi->init("6LoWPAN node", rf_device_register(), mesh_api_callback);
+    // initialize the interface with registered device and callback
+    status = meshApi->init(rf_device_register(), mesh_api_callback);
     if (status < 0)
     {
         printf("Can't initialize mesh network");
@@ -48,17 +48,17 @@ int main() {
         meshApi->processEvent();
     } while (network_state != MESH_CONNECTED);
 
-    printf("Connected to mesh network!");
+    printf("Connected to mesh network, disconnecting...!");
 
-//    meshApi->disconnect();
-//    do
-//    {
-//        mesh_api->processEvent();
-//    } while(network_state != MESH_DISCONNECTED);
+    meshApi->disconnect();
+    do
+    {
+        meshApi->processEvent();
+    } while(network_state != MESH_DISCONNECTED);
 
     delete meshApi;
 
-    printf("All done!");
+    printf("Mesh networking done!");
 
     return 0;
 }

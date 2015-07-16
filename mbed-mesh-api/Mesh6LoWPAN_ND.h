@@ -10,37 +10,21 @@
 class Mesh6LoWPAN_ND : public AbstractMesh {
 
 public:
-    /*
-     * \brief Constructor for the 6LoWPAN_ND interface
-     * \param description is the name for the interface
-     * \param registered device is physical device registered
-     * \param callback_func is callback that is called when network state changes
-     */
-    Mesh6LoWPAN_ND();
+
+    /**
+     * \brief Return singleton of this class
+     * \return class instance.
+    */
+    static Mesh6LoWPAN_ND *getInstance();
 
     ~Mesh6LoWPAN_ND();
 
-    /*
-     * \brief Initialization of the interface.
-     * \param description is the name for the interface
-     * \param registered device is physical device registered
-     * \param callback_func is callback that is called when network state changes
-     * \return >=0 on success.
-     * \return -2 Driver is already associated to other interface.
-     * \return -3 No memory for interface.
-     */
-    int8_t init(const char *interface_name, int8_t registered_device_id, mesh_interface_cb callback_func);
-
-    // methods from the abstract class
-    int8_t init();
-    int8_t connect();
-    int8_t disconnect();
-
     /**
-     * \brief Read own IP address
+     * \brief Read own global IP address
      *
      * \param address is where the IP address will be copied
      * \param len is the length of the address buffer, must be at least 40 bytes
+     * \return true if address is read successfully, false otherwise
      */
     bool getOwnIpAddress(char *address, int8_t len);
 
@@ -49,24 +33,26 @@ public:
      *
      * \param address is where the IP address will be copied
      * \param len is the length of the address buffer, must be at least 40 bytes
+     * \return true if address is read successfully, false otherwise
      */
     bool getRouterIpAddress(char *address, int8_t len);
 
 private:
     /*
-     * Description for the interface
+     * \brief private constructor for the 6LoWPAN_ND
      */
-    const char *description;
+    Mesh6LoWPAN_ND();
 
     /*
-     * Registered device ID
+     * \brief instance
      */
-    int8_t device_id;
+    static Mesh6LoWPAN_ND *instance;
 
     /*
-     * Network interface ID
+     * avoid copy/assign object
      */
-    int8_t network_interface_id;
+    Mesh6LoWPAN_ND(Mesh6LoWPAN_ND const& copy);
+    Mesh6LoWPAN_ND & operator=(Mesh6LoWPAN_ND const& copy);
 };
 
 #endif /* __MESH6LOWPAN_ND_H_ */
