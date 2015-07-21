@@ -1,9 +1,12 @@
-# Example 6LoWPAN_ND application for connecting to border router
-This application establishes connection to mbed 6LoWPAN gateway.
+# Example how to connect to mesh network
+This application establishes connection to mbed 6LoWPAN gateway. After successful 
+connection tahe application disconnects from the network.
 
 ## Pre-requisites
 To build and run this example the requirements below are necessary:
+
 * A computer with the following software installed
+
   * CMake
   * yotta
   * python
@@ -29,10 +32,11 @@ To build and run this example the requirements below are necessary:
 5. Build the examples. This will take a long time if it is the first time that the examples have been built.
 
     ```
+    $ yt target frdm-k64f-gcc
     $ yt build
     ```
 
-6. Start mbed 6LoWPAN Gateway by connecting USB charger 
+6. Start the mbed 6LoWPAN Gateway by connecting USB charger 
 
 7. Copy `build/frdm-k64f-gcc/test/mbed-mesh-api.bin` to your mbed board and wait until the LED next to the USB port stops blinking.
 
@@ -40,7 +44,7 @@ To build and run this example the requirements below are necessary:
 
 9. Press the reset button on the board.
 
-10. The output in the terminal window should indicate that network is established.
+10. The output in the serial terminal emulator window should indicate a log that network is established.
 
 ## Using a debugger
 Optionally, connect using a debugger to set breakpoints and follow program flow. Proceed normally up to and including step 7, then:
@@ -79,5 +83,6 @@ Optionally, connect using a debugger to set breakpoints and follow program flow.
 4. Once the program has loaded, start it.
 
     ```
+    (gdb) mon reset halt
     (gdb) c
     ```

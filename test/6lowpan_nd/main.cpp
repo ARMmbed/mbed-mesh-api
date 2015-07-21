@@ -9,8 +9,10 @@
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
 
+// mesh network state
 static mesh_connection_status_t network_state = MESH_DISCONNECTED;
 
+// mesh network callback, called when network state changes
 void mesh_api_callback(mesh_connection_status_t mesh_status)
 {
     printf("mesh_api_callback %d", mesh_status);
