@@ -8,9 +8,7 @@ communication with a remote peer. When the connection is no longer needed the cl
 can close the connection by using the `disconnect`method.
 
 ### Supported mesh networking modes
-Supported mesh network modes are:
-
-* 6LoWPAN ND (neighbor discovery)
+Currently, only 6LoWPAN ND (neighbor discovery) mode is supported.
 
 ### Mesh socket
 The mbed mesh API cooperates with sockets in the [mbed mesh socket](https://github.com/ARMmbed/mbed-mesh-socket) module. 
