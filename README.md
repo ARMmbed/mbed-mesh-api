@@ -1,11 +1,11 @@
-# mbed mesh api
-The ARM mbed mesh API allows client to use IPv6 mesh network.
+# mbed mesh API
+The ARM mbed mesh API allows the client to use the IPv6 mesh network.
 
-Client can use `Mesh6LoWPAN_ND` object for connecting to the mesh network 
-and once successfully connected the client can create a socket by using the 
+The client can use `Mesh6LoWPAN_ND` object for connecting to the mesh network 
+and once successfully connected, the client can create a socket by using the 
 [mbed C++ socket API](https://github.com/ARMmbed/mbed-net-sockets) to start 
-communication with remote peer. When connection is no longer needed the client 
-can close the connection by using `disconnect`method.
+communication with a remote peer. When the connection is no longer needed the client 
+can close the connection by using the `disconnect`method.
 
 ### Supported mesh networking modes
 Supported mesh network modes are:
@@ -13,60 +13,60 @@ Supported mesh network modes are:
 * 6LoWPAN ND (neighbor discovery)
 
 ### Mesh socket
-The mbed mesh API is cooperates with sockets in module [mbed mesh socket](https://github.com/ARMmbed/mbed-mesh-socket). 
-The module contains documentation about known mesh socket limitations. A full documentation of IPv6/6LoWPAN 
-can stack be found from [IPv6/6LoWPAN stack](https://github.com/ARMmbed/mbed-6lowpan-private).
+The mbed mesh API cooperates with sockets in the [mbed mesh socket](https://github.com/ARMmbed/mbed-mesh-socket) module. 
+The module lists the known mesh socket limitations. Full documentation of the IPv6/6LoWPAN 
+stack can be found in [IPv6/6LoWPAN stack](https://github.com/ARMmbed/mbed-6lowpan-private).
 
 
-## Usage Notes
+## Usage notes
 This module should not be used directly by applications. Applications should 
-use following modules once available:
+use the following modules when they are available:
 
-* `connection manager`for handling network connections
-* `device config API` for configuring the network
+* `connection manager`for handling network connections.
+* `device config API` for configuring the network.
 
-This module is under construction and therefore some limitations exists:
+This module is under construction and therefore, there are some limitations as follows:
 
 * Node is statically configured to router mode.
-* Beacon scan happens on channel 4 (subGhz). This can be changed by setting 
+* Beacon scan takes place on channel 4 (subGhz). You can change this by setting 
  `CONFIGURED_SCAN_CHANNEL` to some other channel in file `mesh_tasklet.c`
 
 ### Network connection states
-After initialization network state is `MESH_DISCONNECTED`. Once successfully connected 
+After the initialization, the network state is `MESH_DISCONNECTED`. After a successful connection, 
 the state changes to `MESH_CONNECTED` and when disconnected from the network the 
 state is changed back to `MESH_DISCONNECTED`.
 
-If case of connection errors the state is changed to some of the connection error 
-states. In the error state there is no need to make `disconnect` request and 
+In case of connection errors, the state is changed to some of the connection error 
+states. In an error state, there is no need to make a `disconnect` request and the
 client is allowed to attempt connecting again.
 
-## Getting Started
-This module contains example application in folder `./test/6lowpan_nd/main.cpp`. 
-To build and run the example see [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
+## Getting started
+This module contains an example application in the `./test/6lowpan_nd/main.cpp` folder. 
+To build and run the example, see the [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
 
-In short, module usage will be like:
+## Usage examples
 
-Create callback function to catch network status
+Create a callback function to catch the network status:
 ```
 void mesh_api_callback(mesh_connection_status_t mesh_status)
 {
     network_state = mesh_status;
 }
 ```
-Create a Mesh6LoWPAN_ND class
+Create a Mesh6LoWPAN_ND class:
 ```C++
 Mesh6LoWPAN_ND *meshApi = Mesh6LoWPAN_ND::getInstance();
 ```
-Initialize object with registered RF device and callback created
+Initialize the object with a registered RF device and create callback:
 ```C++
 meshApi->init(rf_device_register(), mesh_api_callback);
 ```
-Connect to mesh network
+Connect to the mesh network:
 ```C++
 meshApi->connect();
 ```
-Wait callback to be called and once successfully connected create a socket and 
-start communication with remote end
+Wait for the callback to be called and once successfully connected to the mesh network, create a socket and 
+start communication with the remote end:
 ```
 if (network_state == MESH_CONNECTED) {
     UDPaSocket s(SOCKET_STACK_NANOSTACK_IPV6);
@@ -78,17 +78,17 @@ if (network_state == MESH_CONNECTED) {
 ```
 
 ## Testing
-Test application can be found under `./test/system_test`.
+The test application is located in `./test/system_test`.
 
 Use the same setup as in the example application. 
 
-Compile the test
+Compile the test:
 ```
 yt target frdm-k64f-gcc
 yt build
 ```
-1. Flash the frdm-k64f with the software
-2. Start the serial terminal emulator
-3. Press the reset button on the board
-4. Check test results from the traces
+1. Flash the FRDM-K64F with the software.
+2. Start the serial terminal emulator.
+3. Press the **Reset** button on the board.
+4. Check the test results in the traces.
 
