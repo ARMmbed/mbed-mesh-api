@@ -26,7 +26,7 @@ use the following modules when they are available:
 This module is under construction and therefore, there are some limitations as follows:
 
 * Node is statically configured to router mode.
-* Beacon scan takes place on channel 4 (subGhz). You can change this by setting 
+* Beacon scan takes place on channel 12 (2,4 Ghz). You can change this by setting 
  `CONFIGURED_SCAN_CHANNEL` to some other channel in file `mesh_tasklet.c`
 
 ### Network connection states
