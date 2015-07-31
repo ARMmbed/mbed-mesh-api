@@ -19,16 +19,20 @@
 
 #include "mesh_interface_types.h"
 #include "AbstractNetworkInterface.h"
+#include "mbed.h"
+#include "FunctionPointer.h"
 
 /**
  * \brief Mesh networking interface.
  * This class can't be instantiated directly.
  */
 
+using namespace mbed;
+
 class AbstractMesh : public AbstractNetworkInterface {
 
 public:
-
+    typedef FunctionPointer1<void, mesh_connection_status_t> MeshNetworkHandler_t;
     /*
      * Constructor
      */
@@ -41,28 +45,28 @@ public:
     /*
      * \brief Initialization of the interface.
      * \param registered device is physical device registered
-     * \param callback_func is callback that is called when network state changes
+     * \param callbackHandler is callback that is called when network state changes
      * \return >=0 on success.
      * \return -2 Driver is already associated to other interface.
      * \return -3 No memory for interface.
      */
-    int8_t init(int8_t registered_device_id, mesh_interface_cb callback_func);
+    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
 
     int8_t init();
     int8_t connect();
     int8_t disconnect();
 
-    /**
-     * Process event in network stack.
-     * Note! This method will be obsolete once energy scheduler is ready
+    /*
+     * \brief Callback from C-layer
+     * \param state state of the network
      * */
-    void processEvent(void);
+    void callback(mesh_connection_status_t state);
 
 protected:
     /**
      * Mesh callback function
      */
-    mesh_interface_cb callback;
+    MeshNetworkHandler_t _mesh_network_handler;
 
     /*
      * Network interface ID

@@ -15,6 +15,7 @@
  */
 
 #include "mbed.h"
+#include "minar/minar.h"
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
 #include <mbed-net-socket-abstract/test/ctest_env.h>
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
@@ -35,6 +36,19 @@ void mesh_network_callback(mesh_connection_status_t mesh_state)
 {
     tr_info("mesh_network_callback() %d", mesh_state);
     mesh_network_state = mesh_state;
+    if (mesh_network_state == MESH_CONNECTED) {
+        tr_info("Connected to mesh network!");
+        int8_t err = mesh_api->disconnect();
+        TEST_EQ(err, MESH_ERROR_NONE);
+    } else if (mesh_network_state == MESH_DISCONNECTED) {
+        tr_info("Disconnected from mesh network!");
+        minar::Scheduler::stop();
+    } else {
+        // untested branch, catch erros by bad state checking...
+        TEST_EQ(mesh_network_state, MESH_CONNECTED);
+        tr_error("Networking error!");
+        minar::Scheduler::stop();
+    }
 }
 
 int mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
@@ -48,30 +62,15 @@ int mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
         TEST_RETURN();
     }
 
-    for(int i=0; i<loop_count; i++)
-    {
+    for(int i=0; i<loop_count; i++) {
         err = mesh_api->connect();
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             break;
         }
-
-        do
-        {
-            mesh_api->processEvent();
-        } while (mesh_network_state != MESH_CONNECTED);
-
-        err = mesh_api->disconnect();
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
-            break;
-        }
-
-        do
-        {
-            mesh_api->processEvent();
-        } while (mesh_network_state != MESH_DISCONNECTED);
+        // use mesh_network_callback for disconnecting
+        minar::Scheduler::start();
     }
+
     delete mesh_api;
     TEST_RETURN();
 }
@@ -110,6 +109,28 @@ int mesh_api_init(int8_t rf_device_id)
     TEST_RETURN();
 }
 
+/*
+ * Callback from mesh network for mesh_api_connect test
+ */
+void mesh_network_callback_connect_test(mesh_connection_status_t mesh_state)
+{
+    tr_info("mesh_network_callback_connect_test() %d", mesh_state);
+    mesh_network_state = mesh_state;
+    if (mesh_network_state == MESH_CONNECTED) {
+        tr_info("Connected to mesh network!");
+        // stop minar, to let test to go further
+        minar::Scheduler::stop();
+    } else if (mesh_network_state == MESH_DISCONNECTED) {
+        tr_info("Disconnected from mesh network!");
+        minar::Scheduler::stop();
+    } else {
+        // untested branch, catch erros by bad state checking...
+        TEST_EQ(mesh_network_state, MESH_CONNECTED);
+        tr_error("Networking error!");
+        minar::Scheduler::stop();
+    }
+}
+
 int mesh_api_connect(int8_t rf_device_id)
 {
     int8_t err;
@@ -120,30 +141,23 @@ int mesh_api_connect(int8_t rf_device_id)
     {
         // connect uninitialized
         err = abstractMesh->connect();
-        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN))
-        {
+        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
             break;
         }
 
-        err = mesh_api->init(rf_device_id, mesh_network_callback);
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
+        err = mesh_api->init(rf_device_id, mesh_network_callback_connect_test);
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             break;
         }
 
         // successful connect
         mesh_network_state = MESH_DISCONNECTED;
         err = abstractMesh->connect();
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             break;
         }
 
-        do
-        {
-            abstractMesh->processEvent();
-        } while (mesh_network_state != MESH_CONNECTED);
-
+        minar::Scheduler::start();
 
         // try to connect again
         err = abstractMesh->connect();
@@ -158,10 +172,7 @@ int mesh_api_connect(int8_t rf_device_id)
             break;
         }
 
-        do
-        {
-            abstractMesh->processEvent();
-        } while (mesh_network_state != MESH_DISCONNECTED);
+        minar::Scheduler::start();
         break;
     } while(1);
 
@@ -169,6 +180,24 @@ int mesh_api_connect(int8_t rf_device_id)
     TEST_RETURN();
 }
 
+/*
+ * Callback from mesh network for mesh_api_disconnect test
+ */
+void mesh_network_callback_disconnect_test(mesh_connection_status_t mesh_state)
+{
+    tr_info("mesh_network_callback_disconnect_test() %d", mesh_state);
+    mesh_network_state = mesh_state;
+    if (mesh_network_state == MESH_CONNECTED) {
+        tr_info("Connected to mesh network!");
+    } else if (mesh_network_state == MESH_DISCONNECTED) {
+        tr_info("Disconnected from mesh network!");
+        minar::Scheduler::stop();
+    } else {
+        // untested branch, catch erros by bad state checking...
+        TEST_EQ(mesh_network_state, MESH_CONNECTED);
+        tr_error("Networking error!");
+    }
+}
 int mesh_api_disconnect(int8_t rf_device_id)
 {
     int8_t err;
@@ -185,13 +214,7 @@ int mesh_api_disconnect(int8_t rf_device_id)
             break;
         }
 
-        // check that network state changes
-        if (!TEST_EQ(mesh_network_state, MESH_DISCONNECTED))
-        {
-            break;
-        }
-
-        err = mesh_api->init(rf_device_id, mesh_network_callback);
+        err = mesh_api->init(rf_device_id, mesh_network_callback_disconnect_test);
         if (!TEST_EQ(err, MESH_ERROR_NONE))
         {
             break;
@@ -204,6 +227,7 @@ int mesh_api_disconnect(int8_t rf_device_id)
         {
             break;
         }
+        minar::Scheduler::start();
         if (!TEST_EQ(mesh_network_state, MESH_DISCONNECTED))
         {
             break;

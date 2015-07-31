@@ -17,62 +17,55 @@
 #include <stdio.h>
 
 #include "mbed.h"
+#include "minar/minar.h"
 #include "test_env.h"
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
+// For tracing we need to define flag, have include and define group
+#define HAVE_DEBUG 1
+#include "ns_trace.h"
+#define TRACE_GROUP  "mesh_appl"
 
 // mesh network state
-static mesh_connection_status_t network_state = MESH_DISCONNECTED;
+static mesh_connection_status_t mesh_network_state = MESH_DISCONNECTED;
+static Mesh6LoWPAN_ND *meshApi;
 
 // mesh network callback, called when network state changes
-void mesh_api_callback(mesh_connection_status_t mesh_status)
+void mesh_network_callback(mesh_connection_status_t mesh_state)
 {
-    printf("mesh_api_callback %d", mesh_status);
-    network_state = mesh_status;
+    tr_info("mesh_network_callback() %d", mesh_state);
+    mesh_network_state = mesh_state;
+    if (mesh_network_state == MESH_CONNECTED) {
+        tr_info("Connected to mesh network!");
+        meshApi->disconnect();
+    } else if (mesh_network_state == MESH_DISCONNECTED) {
+        tr_info("Disconnected from mesh network!");
+        minar::Scheduler::stop();
+        delete meshApi;
+        tr_info("Mesh networking done!");
+    } else {
+        tr_error("Networking error!");
+    }
 }
 
-int main() {
-    Mesh6LoWPAN_ND *meshApi;
+void app_start(int, char**) {
     int8_t status;
-
-    printf("Mesh API test application");
 
     // create 6LoWPAN_ND interface
     meshApi = Mesh6LoWPAN_ND::getInstance();
+    tr_info("Mesh API test application");
 
     // initialize the interface with registered device and callback
-    status = meshApi->init(rf_device_register(), mesh_api_callback);
-    if (status < 0)
-    {
-        printf("Can't initialize mesh network");
-        return -1;
+    status = meshApi->init(rf_device_register(), mesh_network_callback);
+    if (status < 0) {
+        tr_error("Can't initialize mesh network");
+        return;
     }
 
     // connect interface to the network
     status = meshApi->connect();
-    if (status != 0)
-    {
-        printf("Can't connect to Mesh network!");
-        return -1;
+    if (status != 0) {
+        tr_error("Can't connect to Mesh network!");
+        return;
     }
-
-    // wait until network is connected
-    do
-    {
-        meshApi->processEvent();
-    } while (network_state != MESH_CONNECTED);
-
-    printf("Connected to mesh network, disconnecting...!");
-
-    meshApi->disconnect();
-    do
-    {
-        meshApi->processEvent();
-    } while(network_state != MESH_DISCONNECTED);
-
-    delete meshApi;
-
-    printf("Mesh networking done!");
-
-    return 0;
 }

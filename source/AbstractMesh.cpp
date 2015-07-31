@@ -19,7 +19,9 @@
  */
 
 #include "mesh/mesh_tasklet.h"
+#include "minar/minar.h"
 #include "mbed-mesh-api/AbstractMesh.h"
+#include "include/callback_handler.h"
 
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
@@ -27,14 +29,16 @@
 #define TRACE_GROUP  "m6La"
 
 AbstractMesh::AbstractMesh() :
-    callback(NULL), network_interface_id(-1), device_id(-1)
+    _mesh_network_handler(NULL), network_interface_id(-1), device_id(-1)
 {
+    __abstract_mesh_interface = this;
     // initialize mesh networking resources, memory, timers, etc...
     mesh_tasklet_system_init();
 }
 
 AbstractMesh::~AbstractMesh()
 {
+    __abstract_mesh_interface = NULL;
 }
 
 int8_t AbstractMesh::init()
@@ -43,17 +47,17 @@ int8_t AbstractMesh::init()
     return -1;
 }
 
-int8_t AbstractMesh::init(int8_t registered_device_id, mesh_interface_cb callback_func)
+int8_t AbstractMesh::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
 {
     tr_debug("init()");
 
-    if (callback_func == NULL)
+    if (callbackHandler == (MeshNetworkHandler_t)NULL)
     {
         return MESH_ERROR_PARAM;
     }
 
     device_id = registered_device_id;
-    callback = callback_func;
+    _mesh_network_handler = callbackHandler;
 
     // Create network interface
     network_interface_id = mesh_tasklet_network_init(device_id);
@@ -78,13 +82,13 @@ int8_t AbstractMesh::connect(void)
     int8_t status;
     tr_debug("connect()");
 
-    if (callback == NULL)
+    if (_mesh_network_handler == (MeshNetworkHandler_t)NULL)
     {
         // initialization hasn't been made
         return MESH_ERROR_UNKNOWN;
     }
 
-    status = mesh_tasklet_connect(callback, network_interface_id);
+    status = mesh_tasklet_connect(&__mesh_handler_c_callback, network_interface_id);
     if (status >= 0)
     {
         return MESH_ERROR_NONE;
@@ -122,8 +126,11 @@ int8_t AbstractMesh::disconnect()
     }
 }
 
-void AbstractMesh::processEvent(void)
-{
-    mesh_tasklet_process_event();
+void AbstractMesh::callback(mesh_connection_status_t state) {
+    if (_mesh_network_handler)
+    {
+        minar::Scheduler::postCallback(_mesh_network_handler.bind(state));
+    }
 }
+
 

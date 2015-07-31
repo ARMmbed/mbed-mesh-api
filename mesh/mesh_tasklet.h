@@ -23,6 +23,11 @@
 extern "C" {
 #endif
 
+/**
+ * Type of the network status callback.
+ */
+typedef void (*mesh_interface_cb)(mesh_connection_status_t mesh_status);
+
 /*
  * \brief Read own global IP address
  *
@@ -57,13 +62,6 @@ int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len);
  * \return -3 if network is already connected
  */
 int8_t mesh_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id);
-
-/*
- * \brief Handle events to keep network operational.
- *
- * Note! This method will be removed once energy scheduler is operational.
- */
-void mesh_tasklet_process_event(void);
 
 /*
  * \brief Initialize mesh system.

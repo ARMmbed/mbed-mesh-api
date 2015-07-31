@@ -16,8 +16,7 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "mbed-core": "~0.1.1",
-    "mbed-6lowpan-adaptor": "~0.1.0"
+    "mbed-6lowpan-adaptor": "~0.2.0"
   },
   "testDependencies": {
     "atmel-rf-driver": "~0.0.9"
