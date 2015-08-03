@@ -13,12 +13,7 @@
     "type": "git"
   },
   "homepage": "https://github.com/ARMmbed/mbed-mesh-api",
-  "licenses": [
-    {
-      "url": "https://spdx.org/licenses/Apache-2.0",
-      "type": "Apache-2.0"
-    }
-  ],
+  "license": "Apache-2.0",
   "private": true,
   "dependencies": {
     "mbed-core": "~0.1.1",
