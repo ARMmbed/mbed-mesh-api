@@ -31,7 +31,7 @@ public:
     /**
      * Virtual desctructor.
      */
-    virtual ~AbstractNetworkInterface() = 0;
+    virtual ~AbstractNetworkInterface();
 
     /**
      * Initialize the interface.

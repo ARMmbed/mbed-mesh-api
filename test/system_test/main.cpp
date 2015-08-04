@@ -24,8 +24,7 @@
 
 #define TRACE_GROUP  "main"     // for traces
 
-int main()
-{
+void app_start(int, char**) {
     MBED_HOSTTEST_TIMEOUT(5);
     MBED_HOSTTEST_SELECT(default);
     MBED_HOSTTEST_DESCRIPTION(Mesh network API tests);
@@ -43,6 +42,8 @@ int main()
     // therefore skip tests that require connecting again
     do
     {
+        // stop existing minar
+        minar::Scheduler::stop();
         rc = mesh_api_connect_disconnect_loop(rf_device_id, 1 /*5*/);
         tests_pass = tests_pass && rc;
 
@@ -60,5 +61,4 @@ int main()
     } while (0);
 
     MBED_HOSTTEST_RESULT(tests_pass);
-    return !tests_pass;
 }

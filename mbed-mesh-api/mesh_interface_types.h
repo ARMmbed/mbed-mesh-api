@@ -42,12 +42,6 @@ typedef enum {
     MESH_BOOTSTRAP_FAILED           /*<! error in bootstrap */
 } mesh_connection_status_t;
 
-/**
- * Type of the network status callback
- */
-typedef void (*mesh_interface_cb)(mesh_connection_status_t mesh_status);
-
-
 #ifdef __cplusplus
 }
 #endif

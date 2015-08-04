@@ -178,8 +178,8 @@ void mesh_tasklet_parse_network_event(arm_event_s *event)
         {
             tr_info("Network bootstrap ready");
             tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
-            mesh_tasklet_network_state_changed(MESH_CONNECTED);
             mesh_tasklet_trace_bootstrap_info();
+            mesh_tasklet_network_state_changed(MESH_CONNECTED);
         }
     break;
     case ARM_NWK_NWK_SCAN_FAIL:
@@ -434,12 +434,6 @@ int8_t mesh_tasklet_disconnect()
     // in any case inform client that we are in disconnected state
     mesh_tasklet_network_state_changed(MESH_DISCONNECTED);
     return status;
-}
-
-void mesh_tasklet_process_event(void)
-{
-    extern void event_dispatch_cycle();
-    event_dispatch_cycle();
 }
 
 void mesh_tasklet_system_init()
