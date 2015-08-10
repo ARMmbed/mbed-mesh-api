@@ -24,7 +24,7 @@
 #include "randLIB.h"
 #include "platform/arm_hal_timer.h"
 #include "mesh/mesh_tasklet.h"
-#include <mbed-6lowpan-adaptor/ns_sal.h>
+#include "sal-iface-6lowpan/ns_sal.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
