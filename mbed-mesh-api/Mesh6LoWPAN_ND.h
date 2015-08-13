@@ -23,13 +23,12 @@ class Mesh6LoWPAN_ND : public AbstractMesh {
 
 public:
 
-    /**
-     * \brief Return singleton of this class
-     * \return class instance.
-    */
-    static Mesh6LoWPAN_ND *getInstance();
-
     ~Mesh6LoWPAN_ND();
+
+    // virtual methods from AbstractMesh
+    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
+    int8_t connect();
+    int8_t disconnect();
 
     /**
      * \brief Read own global IP address
@@ -49,16 +48,13 @@ public:
      */
     bool getRouterIpAddress(char *address, int8_t len);
 
+    friend class MeshInterfaceFactory;
+
 private:
     /*
      * \brief private constructor for the 6LoWPAN_ND
      */
     Mesh6LoWPAN_ND();
-
-    /*
-     * \brief instance
-     */
-    static Mesh6LoWPAN_ND *instance;
 
     /*
      * avoid copy/assign object

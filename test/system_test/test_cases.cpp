@@ -15,8 +15,9 @@
  */
 
 #include "mbed.h"
-#include "minar/minar.h"
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
+#include "mbed-mesh-api/MeshThread.h"
+#include "mbed-mesh-api/MeshInterfaceFactory.h"
 #include <mbed-net-socket-abstract/test/ctest_env.h>
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "test_cases.h"
@@ -27,14 +28,16 @@
 #define TRACE_GROUP  "main"     // for traces
 
 static uint8_t mesh_network_state = MESH_DISCONNECTED;
-Mesh6LoWPAN_ND *mesh_api = NULL;
+AbstractMesh *mesh_api = NULL;
+
+extern void test_result_notify(int result, AbstractMesh *meshAPI);
 
 /*
  * Callback from mesh network. Called when network state changes.
  */
-void mesh_network_callback(mesh_connection_status_t mesh_state)
+void test_callback_connect_disconnect(mesh_connection_status_t mesh_state)
 {
-    tr_info("mesh_network_callback() %d", mesh_state);
+    tr_info("test_callback_connect_disconnect() %d", mesh_state);
     mesh_network_state = mesh_state;
     if (mesh_network_state == MESH_CONNECTED) {
         tr_info("Connected to mesh network!");
@@ -42,47 +45,76 @@ void mesh_network_callback(mesh_connection_status_t mesh_state)
         TEST_EQ(err, MESH_ERROR_NONE);
     } else if (mesh_network_state == MESH_DISCONNECTED) {
         tr_info("Disconnected from mesh network!");
-        minar::Scheduler::stop();
+        test_result_notify(test_pass_global, mesh_api);
     } else {
         // untested branch, catch erros by bad state checking...
         TEST_EQ(mesh_network_state, MESH_CONNECTED);
         tr_error("Networking error!");
-        minar::Scheduler::stop();
+        test_result_notify(test_pass_global, mesh_api);
     }
 }
 
-int mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
+void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
 {
     int8_t err;
-    mesh_api = Mesh6LoWPAN_ND::getInstance();
-    err = mesh_api->init(rf_device_id, mesh_network_callback);
+    mesh_api = MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
+    err = mesh_api->init(rf_device_id, test_callback_connect_disconnect);
 
     if (!TEST_EQ(err, MESH_ERROR_NONE))
     {
-        TEST_RETURN();
+        test_result_notify(test_pass_global, mesh_api);
+        return;
     }
 
     for(int i=0; i<loop_count; i++) {
         err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            test_result_notify(test_pass_global, mesh_api);
             break;
         }
-        // use mesh_network_callback for disconnecting
-        minar::Scheduler::start();
+        // control goes to test callback
     }
-
-    delete mesh_api;
-    TEST_RETURN();
 }
 
-int mesh_api_init(int8_t rf_device_id)
+void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count)
 {
     int8_t err;
-    mesh_api = Mesh6LoWPAN_ND::getInstance();
+    mesh_api = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+    uint8_t eui64[8];
+    char *pskd;
+    rf_read_mac_address(eui64);
+    pskd = (char*)"Secret password";
+    err = ((MeshThread*)mesh_api)->init(rf_device_id, test_callback_connect_disconnect, eui64, pskd);
+
+    if (!TEST_EQ(err, MESH_ERROR_NONE))
+    {
+        test_result_notify(test_pass_global, mesh_api);
+        return;
+    }
+
+    for(int i=0; i<loop_count; i++) {
+        err = mesh_api->connect();
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+        // control goes to test callback
+    }
+}
+
+void test_callback_init(mesh_connection_status_t mesh_state)
+{
+    tr_info("test_callback_init() %d", mesh_state);
+}
+
+void test_mesh_api_init(int8_t rf_device_id)
+{
+    int8_t err;
+    mesh_api = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
     do
     {
-        // no callback
+        // no callback set
         err = mesh_api->init(rf_device_id, NULL);
         if (!TEST_EQ(err, MESH_ERROR_PARAM))
         {
@@ -90,152 +122,97 @@ int mesh_api_init(int8_t rf_device_id)
         }
 
         // bad rf-device_id
-        err = mesh_api->init(rf_device_id+1, mesh_network_callback);
+        err = mesh_api->init(rf_device_id+1, test_callback_init);
         if (!TEST_EQ(err, MESH_ERROR_MEMORY))
         {
             break;
         }
 
         // successful re-initialization
-        err = mesh_api->init(rf_device_id, mesh_network_callback);
+        err = mesh_api->init(rf_device_id, test_callback_init);
         if (!TEST_EQ(err, MESH_ERROR_NONE))
+        {
+            break;
+        }
+
+        /* Thread can't be instantiated if ND is initialized */
+        MeshThread *meshThread = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+        if (!TEST_EQ(meshThread, NULL))
         {
             break;
         }
         break;
     } while(1);
 
-    delete mesh_api;
-    TEST_RETURN();
+    test_result_notify(test_pass_global, mesh_api);
 }
 
 /*
  * Callback from mesh network for mesh_api_connect test
  */
-void mesh_network_callback_connect_test(mesh_connection_status_t mesh_state)
+void test_callback_connect(mesh_connection_status_t mesh_state)
 {
-    tr_info("mesh_network_callback_connect_test() %d", mesh_state);
+    int8_t err;
+    tr_info("test_callback_connect() %d", mesh_state);
     mesh_network_state = mesh_state;
+
     if (mesh_network_state == MESH_CONNECTED) {
         tr_info("Connected to mesh network!");
-        // stop minar, to let test to go further
-        minar::Scheduler::stop();
+        // try to connect again, shold fail
+        err = mesh_api->connect();
+        if (!TEST_EQ(err, MESH_ERROR_STATE))
+        {
+            test_result_notify(test_pass_global, mesh_api);
+        }
+        else
+        {
+            // disconnect
+            err = mesh_api->disconnect();
+            if (!TEST_EQ(err, MESH_ERROR_NONE))
+            {
+                test_result_notify(test_pass_global, mesh_api);
+            }
+        }
     } else if (mesh_network_state == MESH_DISCONNECTED) {
         tr_info("Disconnected from mesh network!");
-        minar::Scheduler::stop();
+        test_result_notify(test_pass_global, mesh_api);
     } else {
         // untested branch, catch erros by bad state checking...
         TEST_EQ(mesh_network_state, MESH_CONNECTED);
         tr_error("Networking error!");
-        minar::Scheduler::stop();
     }
 }
 
-int mesh_api_connect(int8_t rf_device_id)
+void test_mesh_api_connect(int8_t rf_device_id)
 {
     int8_t err;
-    mesh_api = Mesh6LoWPAN_ND::getInstance();
-    AbstractMesh *abstractMesh = (AbstractMesh*) mesh_api;
+    mesh_api = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
     do
     {
         // connect uninitialized
-        err = abstractMesh->connect();
+        err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+            test_result_notify(test_pass_global, mesh_api);
             break;
         }
 
-        err = mesh_api->init(rf_device_id, mesh_network_callback_connect_test);
+        err = mesh_api->init(rf_device_id, test_callback_connect);
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            test_result_notify(test_pass_global, mesh_api);
             break;
         }
 
         // successful connect
         mesh_network_state = MESH_DISCONNECTED;
-        err = abstractMesh->connect();
+        err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            test_result_notify(test_pass_global, mesh_api);
             break;
         }
 
-        minar::Scheduler::start();
-
-        // try to connect again
-        err = abstractMesh->connect();
-        if (!TEST_EQ(err, MESH_ERROR_STATE))
-        {
-            break;
-        }
-
-        err = abstractMesh->disconnect();
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
-            break;
-        }
-
-        minar::Scheduler::start();
         break;
     } while(1);
-
-    delete mesh_api;
-    TEST_RETURN();
 }
 
-/*
- * Callback from mesh network for mesh_api_disconnect test
- */
-void mesh_network_callback_disconnect_test(mesh_connection_status_t mesh_state)
-{
-    tr_info("mesh_network_callback_disconnect_test() %d", mesh_state);
-    mesh_network_state = mesh_state;
-    if (mesh_network_state == MESH_CONNECTED) {
-        tr_info("Connected to mesh network!");
-    } else if (mesh_network_state == MESH_DISCONNECTED) {
-        tr_info("Disconnected from mesh network!");
-        minar::Scheduler::stop();
-    } else {
-        // untested branch, catch erros by bad state checking...
-        TEST_EQ(mesh_network_state, MESH_CONNECTED);
-        tr_error("Networking error!");
-    }
-}
-int mesh_api_disconnect(int8_t rf_device_id)
-{
-    int8_t err;
-    mesh_api = Mesh6LoWPAN_ND::getInstance();
-
-    mesh_network_state = MESH_BOOTSTRAP_FAILED;
-
-    do
-    {
-        // disconnect not initialized
-        err = mesh_api->disconnect();
-        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN))
-        {
-            break;
-        }
-
-        err = mesh_api->init(rf_device_id, mesh_network_callback_disconnect_test);
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
-            break;
-        }
-
-        // disconnect not connected
-        mesh_network_state = MESH_BOOTSTRAP_FAILED;
-        err = mesh_api->disconnect();
-        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN))
-        {
-            break;
-        }
-        minar::Scheduler::start();
-        if (!TEST_EQ(mesh_network_state, MESH_DISCONNECTED))
-        {
-            break;
-        }
-        break;
-    } while(1);
-
-    delete mesh_api;
-    TEST_RETURN();
-}
 

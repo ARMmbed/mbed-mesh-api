@@ -50,11 +50,11 @@ public:
      * \return -2 Driver is already associated to other interface.
      * \return -3 No memory for interface.
      */
-    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
+    virtual int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler) = 0;
 
     int8_t init();
-    int8_t connect();
-    int8_t disconnect();
+    virtual int8_t connect() = 0;
+    virtual int8_t disconnect() = 0;
 
     /*
      * \brief Callback from C-layer
@@ -63,6 +63,11 @@ public:
     void callback(mesh_connection_status_t state);
 
 protected:
+
+    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler, MeshNetworkType type);
+    int8_t connect(MeshNetworkType type);
+    int8_t disconnect(MeshNetworkType type);
+
     /**
      * Mesh callback function
      */
@@ -71,12 +76,12 @@ protected:
     /*
      * Network interface ID
      */
-    int8_t network_interface_id;
+    int8_t _network_interface_id;
 
     /*
      * Registered device ID
      */
-    int8_t device_id;
+    int8_t _device_id;
 };
 
 #endif /* __ABSTRACTMESH_H_ */
