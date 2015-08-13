@@ -29,8 +29,9 @@
 
 #define TRACE_GROUP  "m6LND"
 
-Mesh6LoWPAN_ND::Mesh6LoWPAN_ND()
+Mesh6LoWPAN_ND::Mesh6LoWPAN_ND() : AbstractMesh(MESH_TYPE_6LOWPAN_ND)
 {
+
 }
 
 Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
@@ -40,17 +41,17 @@ Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
 
 int8_t Mesh6LoWPAN_ND::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
 {
-    return AbstractMesh::init(registered_device_id, callbackHandler, MESH_TYPE_6LOWPAN_ND);
+    return AbstractMesh::init(registered_device_id, callbackHandler);
 }
 
 int8_t Mesh6LoWPAN_ND::connect()
 {
-    return AbstractMesh::connect(MESH_TYPE_6LOWPAN_ND);
+    return AbstractMesh::connect();
 }
 
 int8_t Mesh6LoWPAN_ND::disconnect()
 {
-    return AbstractMesh::disconnect(MESH_TYPE_6LOWPAN_ND);
+    return AbstractMesh::disconnect();
 }
 
 bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)

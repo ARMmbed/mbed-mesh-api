@@ -42,7 +42,7 @@ client is allowed to attempt connecting again.
 This module contains an example application in the `./test/6lowpan_nd/main.cpp` folder. 
 To build and run the example, see the [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
 
-## Usage examples
+## Usage example for 6LoWPAN ND mode
 
 Create a callback function to catch the network status:
 ```
@@ -53,7 +53,7 @@ void mesh_api_callback(mesh_connection_status_t mesh_status)
 ```
 Create a Mesh6LoWPAN_ND class:
 ```C++
-Mesh6LoWPAN_ND *meshApi = Mesh6LoWPAN_ND::getInstance();
+Mesh6LoWPAN_ND *meshApi = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 ```
 Initialize the object with a registered RF device and create callback:
 ```C++
@@ -74,6 +74,27 @@ if (network_state == MESH_CONNECTED) {
 }
 
 ```
+## Usage example for 6LoWPAN Thread mode
+
+Create a callback function to catch the network status:
+```
+void mesh_api_callback(mesh_connection_status_t mesh_status)
+{
+    network_state = mesh_status;
+}
+```
+Create a MeshThread class:
+```C++
+MeshThread *meshApi = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+```
+Initialize the object with a registered RF device and create callback:
+```
+uint8_t eui64[8];
+rf_read_mac_address(eui64);
+char *pskd = (char*)"Secret password";
+status = meshApi->init(rf_id, mesh_network_callback, eui64, pskd);
+```
+
 
 ## Testing
 The test application is located in `./test/system_test`.

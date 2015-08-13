@@ -35,8 +35,9 @@ public:
     typedef FunctionPointer1<void, mesh_connection_status_t> MeshNetworkHandler_t;
     /*
      * Constructor
+     * \param type network type
      */
-    AbstractMesh();
+    AbstractMesh(MeshNetworkType type);
 
     // Destructor, force derived classes implement own destructors
     // and prevent class creation.
@@ -50,11 +51,10 @@ public:
      * \return -2 Driver is already associated to other interface.
      * \return -3 No memory for interface.
      */
-    virtual int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler) = 0;
+    virtual int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
 
-    int8_t init();
-    virtual int8_t connect() = 0;
-    virtual int8_t disconnect() = 0;
+    virtual int8_t connect();
+    virtual int8_t disconnect();
 
     /*
      * \brief Callback from C-layer
@@ -63,10 +63,6 @@ public:
     void callback(mesh_connection_status_t state);
 
 protected:
-
-    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler, MeshNetworkType type);
-    int8_t connect(MeshNetworkType type);
-    int8_t disconnect(MeshNetworkType type);
 
     /**
      * Mesh callback function
@@ -82,6 +78,11 @@ protected:
      * Registered device ID
      */
     int8_t _device_id;
+
+    /*
+     * Mesh network type
+     */
+    MeshNetworkType _type;
 };
 
 #endif /* __ABSTRACTMESH_H_ */

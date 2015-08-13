@@ -30,7 +30,7 @@
 
 #define TRACE_GROUP  "m6LTh"
 
-MeshThread::MeshThread()
+MeshThread::MeshThread() : AbstractMesh(MESH_TYPE_THREAD)
 {
 }
 
@@ -47,7 +47,7 @@ int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callba
         return MESH_ERROR_PARAM;
     }
 
-    int8_t status = AbstractMesh::init(registered_device_id, callbackHandler, MESH_TYPE_THREAD);
+    int8_t status = AbstractMesh::init(registered_device_id, callbackHandler);
 
     if (status >= 0 )
     {
@@ -65,11 +65,11 @@ int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callba
 
 int8_t MeshThread::connect()
 {
-    return AbstractMesh::connect(MESH_TYPE_THREAD);
+    return AbstractMesh::connect();
 }
 
 int8_t MeshThread::disconnect()
 {
-    return AbstractMesh::disconnect(MESH_TYPE_THREAD);
+    return AbstractMesh::disconnect();
 }
 
