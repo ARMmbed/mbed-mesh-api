@@ -221,7 +221,7 @@ void thread_tasklet_configure_network(void)
     // Link configuration
     thread_tasklet_data_ptr->link_config.steering_data_len = 0;
     memcpy(thread_tasklet_data_ptr->link_config.name, "Arm Powered Core", 16);
-    thread_tasklet_data_ptr->link_config.panId =  0x0691;
+    thread_tasklet_data_ptr->link_config.panId =  THREAD_PANID;
     thread_tasklet_data_ptr->link_config.rfChannel = THREAD_RF_CHANNEL;
     thread_tasklet_data_ptr->channel_list = SCAN_CHANNEL_LIST;
 

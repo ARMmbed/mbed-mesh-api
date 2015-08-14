@@ -38,7 +38,8 @@ extern "C" {
 /*
  * RF channel in Thread configuration
  */
-#define THREAD_RF_CHANNEL 12
+#define THREAD_RF_CHANNEL   12
+#define THREAD_PANID        0xFACE
 
 #ifdef __cplusplus
 }
