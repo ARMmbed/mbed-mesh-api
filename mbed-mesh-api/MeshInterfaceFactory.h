@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef MESH_INTERFACE_FACTORY_H
-#define MESH_INTERFACE_FACTORY_H
+#ifndef __MESHINTERFACEFACTORY_H__
+#define __MESHINTERFACEFACTORY_H__
 
 #include <stdlib.h>
 #include "AbstractMesh.h"
 
 /**
- *  @brief MeshInterfaceFactory.
+ *  \brief MeshInterfaceFactory.
  *  This is a factory class provides interface for creating Mesh Interface
  *  object for application to utilize mesh networking.
  */
@@ -31,10 +31,10 @@ class MeshInterfaceFactory {
 public:
 
     /**
-     * @brief Creates Mesh interface object that can be used for connecting
+     * \brief Creates Mesh interface object that can be used for connecting
      * to mesh network.
-     * @param type, type of the mesh network.
-     * @return M2MInterfaceImpl , Object to manage other LWM2M operations.
+     * \param type, type of the mesh network.
+     * \return M2MInterfaceImpl , Object to manage other LWM2M operations.
      */
     static AbstractMesh *createInterface(const MeshNetworkType &type);
 
@@ -46,4 +46,4 @@ private:
     MeshInterfaceFactory( const MeshInterfaceFactory& /*other*/ );
 };
 
-#endif // MESH_INTERFACE_FACTORY_H
+#endif /* __MESHINTERFACEFACTORY_H__ */

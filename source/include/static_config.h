@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __INCLUDE_MESH_SYSTEM__
-#define __INCLUDE_MESH_SYSTEM__
+#ifndef __INCLUDE_STATIC_CONFIG__
+#define __INCLUDE_STATIC_CONFIG__
 #include "ns_types.h"
 
 #ifdef __cplusplus
@@ -23,12 +23,24 @@ extern "C" {
 #endif
 
 /*
- * \brief Initialize mesh system.
- * Memory pool, timers, traces and support are initialized.
+ * Channel list is defined as 1 shifted by the channel number
+ * f.e.:
+ * channel 4 = 1<<4.
+ * channel 10 = 1<<10
+ *
  */
-void mesh_system_init();
+#define CHANNEL_1       1<<1
+#define CHANNEL_12      1<<12
+#define ALL_CHANNELS    0x07fff800
+
+#define SCAN_CHANNEL_LIST CHANNEL_12
+
+/*
+ * RF channel in Thread configuration
+ */
+#define THREAD_RF_CHANNEL 12
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* __INCLUDE_MESH_SYSTEM__ */
+#endif /* __INCLUDE_STATIC_CONFIG__ */

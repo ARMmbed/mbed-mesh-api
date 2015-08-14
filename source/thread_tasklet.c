@@ -21,34 +21,13 @@
 #include "nsdynmemLIB.h"
 #include "thread_management_if.h"
 #include "include/thread_tasklet.h"
+#include "include/static_config.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
 #define TRACE_GROUP  "m6Thread"
 
-/*
- * Channel list definitions for a beacon scan.
- * TODO: use device config api to fetch these values
- */
-#define CHANNEL_1       1<<1
-#define CHANNEL_2       1<<2
-#define CHANNEL_3       1<<3
-#define CHANNEL_4       1<<4
-#define CHANNEL_5       1<<5
-#define CHANNEL_6       1<<6
-#define CHANNEL_7       1<<7
-#define CHANNEL_8       1<<8
-#define CHANNEL_9       1<<9
-#define CHANNEL_10      1<<10
-#define CHANNEL_11      1<<11
-#define CHANNEL_12      1<<12
-#define ALL_CHANNELS    0x07fff800
-
-// TODO: proper configuration from device config api
-#define CONFIGURED_SCAN_CHANNEL     CHANNEL_4
-#define CONFIGURED_NODE_MODE        NET_6LOWPAN_ROUTER
-#define CONFIGURED_SEC_MODE         NET_SEC_MODE_NO_LINK_SECURITY
-#define CONFIGURED_INTERFACE_NAME   "6L_THREAD"
+#define INTERFACE_NAME   "6L-THREAD"
 
 // Tasklet timer events
 #define TIMER_EVENT_START_BOOTSTRAP   1
@@ -243,8 +222,8 @@ void thread_tasklet_configure_network(void)
     thread_tasklet_data_ptr->link_config.steering_data_len = 0;
     memcpy(thread_tasklet_data_ptr->link_config.name, "Arm Powered Core", 16);
     thread_tasklet_data_ptr->link_config.panId =  0x0691;
-    thread_tasklet_data_ptr->link_config.rfChannel = 19;
-    thread_tasklet_data_ptr->channel_list = 1<<19;
+    thread_tasklet_data_ptr->link_config.rfChannel = THREAD_RF_CHANNEL;
+    thread_tasklet_data_ptr->channel_list = SCAN_CHANNEL_LIST;
 
     //Beacon data setting
     thread_tasklet_data_ptr->link_config.Protocol_id = 0x03;
@@ -394,7 +373,7 @@ int8_t thread_tasklet_network_init(int8_t device_id)
 {
     // TODO, read interface name from configuration
     return arm_nwk_interface_init(NET_INTERFACE_RF_6LOWPAN, device_id,
-            CONFIGURED_INTERFACE_NAME);
+            INTERFACE_NAME);
 }
 
 void thread_tasklet_set_device_config(uint8_t *eui64, char* pskd)

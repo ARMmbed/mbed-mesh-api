@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __THREAD_TASKLET_
-#define __THREAD_TASKLET_
+#ifndef __INCLUDE_THREAD_TASKLET__
+#define __INCLUDE_THREAD_TASKLET__
 #include "ns_types.h"
 #include "eventOS_event.h"
 #include "mbed-mesh-api/mesh_interface_types.h"
@@ -74,4 +74,4 @@ int8_t thread_tasklet_disconnect();
 #ifdef __cplusplus
 }
 #endif
-#endif /* __THREAD_TASKLET_ */
+#endif /* __INCLUDE_THREAD_TASKLET__ */

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef __MESH6LOWPAN_ND_H_
-#define __MESH6LOWPAN_ND_H_
+#ifndef __MESH6LOWPAN_ND_H__
+#define __MESH6LOWPAN_ND_H__
 
 #include "AbstractMesh.h"
+
+/**
+ * \brief 6LoWPAN ND mesh networking class.
+ */
 
 class Mesh6LoWPAN_ND : public AbstractMesh {
 
@@ -63,4 +67,4 @@ private:
     Mesh6LoWPAN_ND & operator=(Mesh6LoWPAN_ND const& copy);
 };
 
-#endif /* __MESH6LOWPAN_ND_H_ */
+#endif /* __MESH6LOWPAN_ND_H__ */

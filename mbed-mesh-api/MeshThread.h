@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-#ifndef __MESH_THREAD_H_
-#define __MESH_THREAD_H_
+#ifndef __MESHTHREAD_H__
+#define __MESHTHREAD_H__
 
 #include "AbstractMesh.h"
+
+/**
+ * \brief 6LoWPAN Thread mesh networking class.
+ */
 
 class MeshThread : public AbstractMesh {
 
@@ -29,7 +33,7 @@ public:
      * \brief Initialization of the interface.
      * \param registered device is physical device registered
      * \param callbackHandler is callback that is called when network state changes
-     * \param eui64 MAC address of the registered RF driver
+     * \param eui64 pointer to MAC address (8 bytes) of the registered RF driver
      * \param pskd private shared key
      * \return >=0 on success.
      * \return -2 Driver is already associated to other interface.
@@ -57,4 +61,4 @@ private:
     MeshThread & operator=(MeshThread const& copy);
 };
 
-#endif /* __MESH_THREAD_H_ */
+#endif /* __MESHTHREAD_H__ */

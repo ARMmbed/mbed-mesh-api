@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __ABSTRACTMESH_H_
-#define __ABSTRACTMESH_H_
+#ifndef __ABSTRACTMESH_H__
+#define __ABSTRACTMESH_H__
 
 #include "mesh_interface_types.h"
 #include "AbstractNetworkInterface.h"
@@ -23,7 +23,7 @@
 #include "FunctionPointer.h"
 
 /**
- * \brief Mesh networking interface.
+ * \brief Abstract Mesh networking interface.
  * This class can't be instantiated directly.
  */
 
@@ -85,4 +85,4 @@ protected:
     MeshNetworkType _type;
 };
 
-#endif /* __ABSTRACTMESH_H_ */
+#endif /* __ABSTRACTMESH_H__ */

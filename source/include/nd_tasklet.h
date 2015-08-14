@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ND_TASKLET_
-#define _ND_TASKLET_
+#ifndef __INCLUDE_ND_TASKLET__
+#define __INCLUDE_ND_TASKLET__
 #include "ns_types.h"
 #include "eventOS_event.h"
 #include "mbed-mesh-api/mesh_interface_types.h"
@@ -89,4 +89,4 @@ int8_t nd_tasklet_disconnect();
 #ifdef __cplusplus
 }
 #endif
-#endif /* _ND_TASKLET_ */
+#endif /* __INCLUDE_ND_TASKLET__ */
