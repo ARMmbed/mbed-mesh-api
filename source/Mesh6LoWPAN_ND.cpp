@@ -20,39 +20,44 @@
  */
 
 #include <stdio.h>
-#include "mesh/mesh_tasklet.h"
+#include "mbed.h"
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
+#include "include/nd_tasklet.h"
 
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
 
 #define TRACE_GROUP  "m6LND"
 
-Mesh6LoWPAN_ND* Mesh6LoWPAN_ND::instance = 0;
-
-Mesh6LoWPAN_ND *Mesh6LoWPAN_ND::getInstance()
+Mesh6LoWPAN_ND::Mesh6LoWPAN_ND() : AbstractMesh(MESH_TYPE_6LOWPAN_ND)
 {
-    if(instance == 0)
-    {
-        instance = new Mesh6LoWPAN_ND();
-    }
-    return instance;
-}
 
-Mesh6LoWPAN_ND::Mesh6LoWPAN_ND()
-{
 }
 
 Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
 {
     tr_debug("~Mesh6LoWPAN()");
-    instance = NULL;
+}
+
+int8_t Mesh6LoWPAN_ND::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
+{
+    return AbstractMesh::init(registered_device_id, callbackHandler);
+}
+
+int8_t Mesh6LoWPAN_ND::connect()
+{
+    return AbstractMesh::connect();
+}
+
+int8_t Mesh6LoWPAN_ND::disconnect()
+{
+    return AbstractMesh::disconnect();
 }
 
 bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)
 {
     tr_debug("getOwnIpAddress()");
-    if (mesh_tasklet_get_ip_address(address, len) == 0)
+    if (nd_tasklet_get_ip_address(address, len) == 0)
     {
         return true;
     }
@@ -62,7 +67,7 @@ bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)
 bool Mesh6LoWPAN_ND::getRouterIpAddress(char *address, int8_t len)
 {
     tr_debug("getRouterIpAddress()");
-    if (mesh_tasklet_get_router_ip_address(address, len) == 0)
+    if (nd_tasklet_get_router_ip_address(address, len) == 0)
     {
         return true;
     }

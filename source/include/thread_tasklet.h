@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef _NODE_TASKLET_MAIN_
-#define _NODE_TASKLET_MAIN_
+
+#ifndef __INCLUDE_THREAD_TASKLET__
+#define __INCLUDE_THREAD_TASKLET__
 #include "ns_types.h"
 #include "eventOS_event.h"
 #include "mbed-mesh-api/mesh_interface_types.h"
@@ -29,28 +30,6 @@ extern "C" {
 typedef void (*mesh_interface_cb)(mesh_connection_status_t mesh_status);
 
 /*
- * \brief Read own global IP address
- *
- * \param address where own IP address will be written
- * \param len length of provided address buffer
- *
- * \return 0 on success
- * \return -1 if address reading fails
- */
-int8_t mesh_tasklet_get_ip_address(char *address, int8_t len);
-
-/*
- * \brief Read border router IP address
- *
- * \param address where router IP address will be written
- * \param len length of provided address buffer
- *
- * \return 0 on success
- * \return -1 if address reading fails
- */
-int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len);
-
-/*
  * \brief Connect to mesh network
  *
  * \param callback to be called when network state changes
@@ -61,13 +40,13 @@ int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len);
  * \return -2 if memory allocation fails
  * \return -3 if network is already connected
  */
-int8_t mesh_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id);
+int8_t thread_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id);
 
 /*
  * \brief Initialize mesh system.
  * Memory pool, timers, traces and support are initialized.
  */
-void mesh_tasklet_system_init();
+void thread_tasklet_init();
 
 /*
  * \brief Create network interface.
@@ -75,7 +54,14 @@ void mesh_tasklet_system_init();
  * \param device_id registered physical device
  * \return interface ID that can be used to communication with this interface
  */
-int8_t mesh_tasklet_network_init(int8_t device_id);
+int8_t thread_tasklet_network_init(int8_t device_id);
+
+/*
+ * \brief Set device configuration for thread network
+ * \param eui64 mac address of the registered rf device
+ * \param pskd private shared key
+ */
+void thread_tasklet_set_device_config(uint8_t *eui64, char* pskd);
 
 /*
  * \brief Disconnect network interface.
@@ -83,9 +69,9 @@ int8_t mesh_tasklet_network_init(int8_t device_id);
  * \return >= 0 if disconnected successfully.
  * \return < 0 in case of errors
  */
-int8_t mesh_tasklet_disconnect();
+int8_t thread_tasklet_disconnect();
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* _NODE_TASKLET_MAIN_ */
+#endif /* __INCLUDE_THREAD_TASKLET__ */

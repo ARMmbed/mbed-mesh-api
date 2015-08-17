@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef __MESH6LOWPAN_ND_H_
-#define __MESH6LOWPAN_ND_H_
+#ifndef __MESH6LOWPAN_ND_H__
+#define __MESH6LOWPAN_ND_H__
 
 #include "AbstractMesh.h"
+
+/**
+ * \brief 6LoWPAN ND mesh networking class.
+ */
 
 class Mesh6LoWPAN_ND : public AbstractMesh {
 
 public:
 
-    /**
-     * \brief Return singleton of this class
-     * \return class instance.
-    */
-    static Mesh6LoWPAN_ND *getInstance();
-
     ~Mesh6LoWPAN_ND();
+
+    // virtual methods from AbstractMesh
+    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
+    int8_t connect();
+    int8_t disconnect();
 
     /**
      * \brief Read own global IP address
@@ -49,16 +52,13 @@ public:
      */
     bool getRouterIpAddress(char *address, int8_t len);
 
+    friend class MeshInterfaceFactory;
+
 private:
     /*
      * \brief private constructor for the 6LoWPAN_ND
      */
     Mesh6LoWPAN_ND();
-
-    /*
-     * \brief instance
-     */
-    static Mesh6LoWPAN_ND *instance;
 
     /*
      * avoid copy/assign object
@@ -67,4 +67,4 @@ private:
     Mesh6LoWPAN_ND & operator=(Mesh6LoWPAN_ND const& copy);
 };
 
-#endif /* __MESH6LOWPAN_ND_H_ */
+#endif /* __MESH6LOWPAN_ND_H__ */

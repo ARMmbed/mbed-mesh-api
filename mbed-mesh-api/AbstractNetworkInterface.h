@@ -34,11 +34,6 @@ public:
     virtual ~AbstractNetworkInterface();
 
     /**
-     * Initialize the interface.
-     */
-    virtual int8_t init() = 0;
-
-    /**
      * Connect the interface.
      */
     virtual int8_t connect() = 0;

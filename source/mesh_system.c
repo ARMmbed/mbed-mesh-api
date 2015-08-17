@@ -1,0 +1,70 @@
+/*
+ * Copyright (c) 2015 ARM Limited. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ * Licensed under the Apache License, Version 2.0 (the License); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an AS IS BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "eventOS_scheduler.h"
+#include "net_interface.h"
+#include "nsdynmemLIB.h"
+#include "randLIB.h"
+#include "platform/arm_hal_timer.h"
+#include "sal-iface-6lowpan/ns_sal.h"
+// For tracing we need to define flag, have include and define group
+#define HAVE_DEBUG 1
+#include "ns_trace.h"
+#define TRACE_GROUP  "m6-mesh-system"
+
+/* Heap for NanoStack */
+#define MESH_HEAP_SIZE 32500
+static uint8_t app_stack_heap[MESH_HEAP_SIZE + 1];
+static int8_t mesh_initialized = false;
+
+/*
+ * Heap error handler, called when heap problem is detected.
+ * Function is for-ever loop.
+ */
+static void mesh_system_heap_error_handler(heap_fail_t event)
+{
+    tr_error("Heap error, mesh_system_heap_error_handler() %d", event);
+    switch (event)
+    {
+    case NS_DYN_MEM_NULL_FREE:
+    case NS_DYN_MEM_DOUBLE_FREE:
+    case NS_DYN_MEM_ALLOCATE_SIZE_NOT_VALID:
+    case NS_DYN_MEM_POINTER_NOT_VALID:
+    case NS_DYN_MEM_HEAP_SECTOR_CORRUPTED:
+    case NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED:
+        break;
+    default:
+        break;
+    }
+    while (1);
+}
+
+void mesh_system_init()
+{
+    if (mesh_initialized == false)
+    {
+        ns_dyn_mem_init(app_stack_heap, MESH_HEAP_SIZE,
+                mesh_system_heap_error_handler, 0);
+        randLIB_seed_random();
+        platform_timer_enable();
+        eventOS_scheduler_init();
+        trace_init(); // trace system needs to be initialized right after eventOS_scheduler_init
+        net_init_core();
+        /* initialize 6LoWPAN socket adaptation layer */
+        ns_sal_init_stack();
+        mesh_initialized = true;
+    }
+}

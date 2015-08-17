@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __ABSTRACTMESH_H_
-#define __ABSTRACTMESH_H_
+#ifndef __ABSTRACTMESH_H__
+#define __ABSTRACTMESH_H__
 
 #include "mesh_interface_types.h"
 #include "AbstractNetworkInterface.h"
@@ -23,7 +23,7 @@
 #include "FunctionPointer.h"
 
 /**
- * \brief Mesh networking interface.
+ * \brief Abstract Mesh networking interface.
  * This class can't be instantiated directly.
  */
 
@@ -35,8 +35,9 @@ public:
     typedef FunctionPointer1<void, mesh_connection_status_t> MeshNetworkHandler_t;
     /*
      * Constructor
+     * \param type network type
      */
-    AbstractMesh();
+    AbstractMesh(MeshNetworkType type);
 
     // Destructor, force derived classes implement own destructors
     // and prevent class creation.
@@ -50,11 +51,10 @@ public:
      * \return -2 Driver is already associated to other interface.
      * \return -3 No memory for interface.
      */
-    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
+    virtual int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
 
-    int8_t init();
-    int8_t connect();
-    int8_t disconnect();
+    virtual int8_t connect();
+    virtual int8_t disconnect();
 
     /*
      * \brief Callback from C-layer
@@ -63,6 +63,7 @@ public:
     void callback(mesh_connection_status_t state);
 
 protected:
+
     /**
      * Mesh callback function
      */
@@ -71,12 +72,17 @@ protected:
     /*
      * Network interface ID
      */
-    int8_t network_interface_id;
+    int8_t _network_interface_id;
 
     /*
      * Registered device ID
      */
-    int8_t device_id;
+    int8_t _device_id;
+
+    /*
+     * Mesh network type
+     */
+    MeshNetworkType _type;
 };
 
-#endif /* __ABSTRACTMESH_H_ */
+#endif /* __ABSTRACTMESH_H__ */

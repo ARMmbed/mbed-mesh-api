@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef __TEST_CASES__H__
-#define __TEST_CASES__H__
+#ifndef __INCLUDE_MESH_SYSTEM__
+#define __INCLUDE_MESH_SYSTEM__
+#include "ns_types.h"
 
-/* positive cases */
-void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count);
-void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* failure cases */
-void test_mesh_api_init(int8_t rf_device_id);
-void test_mesh_api_connect(int8_t rf_device_id);
-void test_mesh_api_disconnect(int8_t rf_device_id);
+/*
+ * \brief Initialize mesh system.
+ * Memory pool, timers, traces and support are initialized.
+ */
+void mesh_system_init();
 
-#endif /* __TEST_CASES__H__ */
+#ifdef __cplusplus
+}
+#endif
+#endif /* __INCLUDE_MESH_SYSTEM__ */

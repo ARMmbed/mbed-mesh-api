@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef SOURCE_INCLUDE_CALLBACK_HANDLER_H_
-#define SOURCE_INCLUDE_CALLBACK_HANDLER_H_
+#ifndef __INCLUDE_CALLBACK_HANDLER_H__
+#define __INCLUDE_CALLBACK_HANDLER_H__
 
 #include "mbed.h"
 #include "mbed-mesh-api/AbstractMesh.h"
@@ -34,4 +34,4 @@ void __mesh_handler_c_callback(mesh_connection_status_t state);
 
 
 
-#endif /* SOURCE_INCLUDE_CALLBACK_HANDLER_H_ */
+#endif /* __INCLUDE_CALLBACK_HANDLER_H__ */

@@ -14,16 +14,34 @@
  * limitations under the License.
  */
 
-#ifndef __TEST_CASES__H__
-#define __TEST_CASES__H__
+#ifndef __INCLUDE_STATIC_CONFIG__
+#define __INCLUDE_STATIC_CONFIG__
+#include "ns_types.h"
 
-/* positive cases */
-void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count);
-void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* failure cases */
-void test_mesh_api_init(int8_t rf_device_id);
-void test_mesh_api_connect(int8_t rf_device_id);
-void test_mesh_api_disconnect(int8_t rf_device_id);
+/*
+ * Channel list is defined as 1 shifted by the channel number
+ * f.e.:
+ * channel 4 = 1<<4.
+ * channel 10 = 1<<10
+ *
+ */
+#define CHANNEL_1       1<<1
+#define CHANNEL_12      1<<12
+#define ALL_CHANNELS    0x07fff800
 
-#endif /* __TEST_CASES__H__ */
+#define SCAN_CHANNEL_LIST CHANNEL_12
+
+/*
+ * RF channel in Thread configuration
+ */
+#define THREAD_RF_CHANNEL   12
+#define THREAD_PANID        0xFACE
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* __INCLUDE_STATIC_CONFIG__ */

@@ -16,43 +16,18 @@
 
 #include <string.h> //memset
 #include "eventOS_event_timer.h"
-#include "eventOS_scheduler.h"
 #include "common_functions.h"
-#include "ip6string.h"  //ip6tos
 #include "net_interface.h"
+#include "ip6string.h"  //ip6tos
 #include "nsdynmemLIB.h"
-#include "randLIB.h"
-#include "platform/arm_hal_timer.h"
-#include "mesh/mesh_tasklet.h"
-#include "sal-iface-6lowpan/ns_sal.h"
+#include "include/nd_tasklet.h"
+#include "include/static_config.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
-#define TRACE_GROUP  "m6Lt"
+#define TRACE_GROUP  "m6LND"
 
-/*
- * Channel list definitions for a beacon scan.
- * TODO: use device config api to fetch these values
- */
-#define CHANNEL_1       1<<1
-#define CHANNEL_2       1<<2
-#define CHANNEL_3       1<<3
-#define CHANNEL_4       1<<4
-#define CHANNEL_5       1<<5
-#define CHANNEL_6       1<<6
-#define CHANNEL_7       1<<7
-#define CHANNEL_8       1<<8
-#define CHANNEL_9       1<<9
-#define CHANNEL_10      1<<10
-#define CHANNEL_11      1<<11
-#define CHANNEL_12      1<<12
-#define ALL_CHANNELS    0x07fff800
-
-// TODO: proper configuration from device config api
-#define CONFIGURED_SCAN_CHANNEL     CHANNEL_12
-#define CONFIGURED_NODE_MODE        NET_6LOWPAN_ROUTER
-#define CONFIGURED_SEC_MODE         NET_SEC_MODE_NO_LINK_SECURITY
-#define CONFIGURED_INTERFACE_NAME   "6LND"
+#define INTERFACE_NAME   "6L-ND"
 
 // Tasklet timer events
 #define TIMER_EVENT_START_BOOTSTRAP   1
@@ -85,23 +60,19 @@ typedef struct
     int8_t network_interface_id;
 } tasklet_data_str_t;
 
-/* Heap for NanoStack */
-#define MESH_HEAP_SIZE 32500
-static uint8_t app_stack_heap[MESH_HEAP_SIZE + 1];
-
 /* Tasklet data */
 static tasklet_data_str_t *tasklet_data_ptr = NULL;
 
 /* private function prototypes */
-void mesh_tasklet_main(arm_event_s *event);
-void mesh_tasklet_network_state_changed(mesh_connection_status_t status);
-void mesh_tasklet_parse_network_event(arm_event_s *event);
-void mesh_tasklet_configure_network(void);
-#define TRACE_MESH_TASKLET
-#ifndef TRACE_MESH_TASKLET
-#define mesh_tasklet_trace_bootstrap_info() ((void) 0)
+void nd_tasklet_main(arm_event_s *event);
+void nd_tasklet_network_state_changed(mesh_connection_status_t status);
+void nd_tasklet_parse_network_event(arm_event_s *event);
+void nd_tasklet_configure_network(void);
+#define TRACE_ND_TASKLET
+#ifndef TRACE_ND_TASKLET
+#define nd_tasklet_trace_bootstrap_info() ((void) 0)
 #else
-void mesh_tasklet_trace_bootstrap_info(void);
+void nd_tasklet_trace_bootstrap_info(void);
 #endif
 
 /*
@@ -110,7 +81,7 @@ void mesh_tasklet_trace_bootstrap_info(void);
  *
  * NOTE: Interrupts requested by HW are possible during this function!
  */
-void mesh_tasklet_main(arm_event_s *event)
+void nd_tasklet_main(arm_event_s *event)
 {
     arm_library_event_type_e event_type;
     event_type = (arm_library_event_type_e) event->event_type;
@@ -127,7 +98,7 @@ void mesh_tasklet_main(arm_event_s *event)
         /* This event is delivered every and each time when there is new
          * information of network connectivity.
          */
-        mesh_tasklet_parse_network_event(event);
+        nd_tasklet_parse_network_event(event);
     break;
 
     case ARM_LIB_TASKLET_INIT_EVENT:
@@ -136,7 +107,7 @@ void mesh_tasklet_main(arm_event_s *event)
          * This event should be delivered ONLY ONCE.
          */
         tasklet_data_ptr->node_main_tasklet_id = event->receiver;
-        mesh_tasklet_configure_network();
+        nd_tasklet_configure_network();
     break;
 
     case ARM_LIB_SYSTEM_TIMER_EVENT:
@@ -166,7 +137,7 @@ void mesh_tasklet_main(arm_event_s *event)
  * - ARM_NWK_NWK_PARENT_POLL_FAIL: Host should run net start without any PAN-id filter and all channels
  * - ARM_NWK_AUHTENTICATION_FAIL: Pana Authentication fail, Stack is Already at Idle state
  */
-void mesh_tasklet_parse_network_event(arm_event_s *event)
+void nd_tasklet_parse_network_event(arm_event_s *event)
 {
     arm_nwk_interface_status_type_e status = (arm_nwk_interface_status_type_e) event->event_data;
     tr_debug("app_parse_network_event() %d", status);
@@ -178,8 +149,8 @@ void mesh_tasklet_parse_network_event(arm_event_s *event)
         {
             tr_info("Network bootstrap ready");
             tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
-            mesh_tasklet_trace_bootstrap_info();
-            mesh_tasklet_network_state_changed(MESH_CONNECTED);
+            nd_tasklet_trace_bootstrap_info();
+            nd_tasklet_network_state_changed(MESH_CONNECTED);
         }
     break;
     case ARM_NWK_NWK_SCAN_FAIL:
@@ -223,7 +194,7 @@ void mesh_tasklet_parse_network_event(arm_event_s *event)
  * \brief Configure mesh network
  *
  */
-void mesh_tasklet_configure_network(void)
+void nd_tasklet_configure_network(void)
 {
     int8_t status;
 
@@ -256,45 +227,25 @@ void mesh_tasklet_configure_network(void)
     {
         tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
         tr_err("Bootstrap start failed, %d", status);
-        mesh_tasklet_network_state_changed(MESH_BOOTSTRAP_START_FAILED);
+        nd_tasklet_network_state_changed(MESH_BOOTSTRAP_START_FAILED);
     }
 }
 
 /*
  * Inform application about network state change
  */
-void mesh_tasklet_network_state_changed(mesh_connection_status_t status)
+void nd_tasklet_network_state_changed(mesh_connection_status_t status)
 {
-    (tasklet_data_ptr->mesh_api_cb)(status);
-}
-
-/*
- * Heap error handler, called when heap problem is detected.
- * Function is for-ever loop.
- */
-static void mesh_tasklet_heap_error_handler(heap_fail_t event)
-{
-    tr_error("Heap error, ns_wrapper_heap_error_handler() %d", event);
-    switch (event)
-    {
-    case NS_DYN_MEM_NULL_FREE:
-        case NS_DYN_MEM_DOUBLE_FREE:
-        case NS_DYN_MEM_ALLOCATE_SIZE_NOT_VALID:
-        case NS_DYN_MEM_POINTER_NOT_VALID:
-        case NS_DYN_MEM_HEAP_SECTOR_CORRUPTED:
-        case NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED:
-        break;
-    default:
-        break;
+    if (tasklet_data_ptr->mesh_api_cb) {
+        (tasklet_data_ptr->mesh_api_cb)(status);
     }
-    while (1);
 }
 
 /*
  * Trace bootstrap information.
  */
-#ifdef TRACE_MESH_TASKLET
-void mesh_tasklet_trace_bootstrap_info()
+#ifdef TRACE_ND_TASKLET
+void nd_tasklet_trace_bootstrap_info()
 {
     network_layer_address_s app_nd_address_info;
     link_layer_address_s app_link_address_info;
@@ -339,10 +290,10 @@ void mesh_tasklet_trace_bootstrap_info()
     }
     tr_debug("traced bootstrap info");
 }
-#endif /* #define TRACE_MESH_TASKLET */
+#endif /* #define TRACE_ND_TASKLET */
 
 /* Public functions */
-int8_t mesh_tasklet_get_ip_address(char *address, int8_t len)
+int8_t nd_tasklet_get_ip_address(char *address, int8_t len)
 {
     uint8_t binary_ipv6[16];
 
@@ -359,7 +310,7 @@ int8_t mesh_tasklet_get_ip_address(char *address, int8_t len)
     }
 }
 
-int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len)
+int8_t nd_tasklet_get_router_ip_address(char *address, int8_t len)
 {
     network_layer_address_s nd_address;
 
@@ -376,7 +327,7 @@ int8_t mesh_tasklet_get_router_ip_address(char *address, int8_t len)
     }
 }
 
-int8_t mesh_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
+int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
 {
     int8_t status = 0;
     int8_t re_connecting = true;
@@ -397,16 +348,14 @@ int8_t mesh_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     tasklet_data_ptr->tasklet_state = TASKLET_STATE_INITIALIZED;
 
     //TODO: Fetch these values from device config api
-    tasklet_data_ptr->channel_list = CONFIGURED_SCAN_CHANNEL;
-    tasklet_data_ptr->mode = CONFIGURED_NODE_MODE;
-    tasklet_data_ptr->sec_mode = CONFIGURED_SEC_MODE;
+    tasklet_data_ptr->channel_list = SCAN_CHANNEL_LIST;
+    tasklet_data_ptr->mode = NET_6LOWPAN_ROUTER;
+    tasklet_data_ptr->sec_mode = NET_SEC_MODE_NO_LINK_SECURITY;
     //tasklet_data_ptr->psk_sec_info.key_id = 0;
-
-    tr_debug("Scan channel %d", (CONFIGURED_SCAN_CHANNEL>>2));
 
     if (re_connecting == false)
     {
-        int8_t status = eventOS_event_handler_create(&mesh_tasklet_main,
+        int8_t status = eventOS_event_handler_create(&nd_tasklet_main,
                 ARM_LIB_TASKLET_INIT_EVENT);
         if (status < 0)
         {
@@ -417,13 +366,13 @@ int8_t mesh_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     }
     else
     {
-        mesh_tasklet_configure_network();
+        nd_tasklet_configure_network();
     }
 
     return status;
 }
 
-int8_t mesh_tasklet_disconnect()
+int8_t nd_tasklet_disconnect()
 {
     int8_t status = -1;
     if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID)
@@ -432,37 +381,25 @@ int8_t mesh_tasklet_disconnect()
         tasklet_data_ptr->network_interface_id = INVALID_INTERFACE_ID;
     }
     // in any case inform client that we are in disconnected state
-    mesh_tasklet_network_state_changed(MESH_DISCONNECTED);
+    nd_tasklet_network_state_changed(MESH_DISCONNECTED);
     return status;
 }
 
-void mesh_tasklet_system_init()
+void nd_tasklet_init()
 {
     if (tasklet_data_ptr == NULL)
     {
-        /*
-         * Initialization can happen only once!
-         */
-        ns_dyn_mem_init(app_stack_heap, MESH_HEAP_SIZE,
-                mesh_tasklet_heap_error_handler, 0);
-        randLIB_seed_random();
-        platform_timer_enable();
-        eventOS_scheduler_init();
-        trace_init(); // trace system needs to be initialized right after eventOS_scheduler_init
-        net_init_core();
         // memory allocation will not fail as memory was just initialized
         tasklet_data_ptr = ns_dyn_mem_alloc(sizeof(tasklet_data_str_t));
         tasklet_data_ptr->tasklet_state = TASKLET_STATE_CREATED;
         tasklet_data_ptr->network_interface_id = INVALID_INTERFACE_ID;
-        /* initialize socket adaptation layer */
-        ns_sal_init_stack();
     }
 }
 
-int8_t mesh_tasklet_network_init(int8_t device_id)
+int8_t nd_tasklet_network_init(int8_t device_id)
 {
     // TODO, read interface name from configuration
     return arm_nwk_interface_init(NET_INTERFACE_RF_6LOWPAN, device_id,
-            CONFIGURED_INTERFACE_NAME);
+            INTERFACE_NAME);
 }
 

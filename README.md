@@ -1,20 +1,19 @@
 # mbed mesh API
 The ARM mbed mesh API allows the client to use the IPv6 mesh network.
 
-The client can use `Mesh6LoWPAN_ND` object for connecting to the mesh network 
-and once successfully connected, the client can create a socket by using the 
-[mbed C++ socket API](https://github.com/ARMmbed/mbed-net-sockets) to start 
+The client can use `Mesh6LoWPAN_ND` or `MeshThread`object for connecting to the 
+mesh network and once successfully connected, the client can create a socket by 
+using the [mbed C++ socket API](https://github.com/ARMmbed/sockets) to start 
 communication with a remote peer. When the connection is no longer needed the client 
-can close the connection by using the `disconnect`method.
+can close the connection by using the `disconnect` method.
 
 ### Supported mesh networking modes
-Currently, only 6LoWPAN ND (neighbor discovery) mode is supported.
+Currently, 6LoWPAN-ND (neighbor discovery) and Thread bootstrap modes are supported.
 
 ### Mesh socket
-The mbed mesh API cooperates with sockets in the [mbed mesh socket](https://github.com/ARMmbed/mbed-mesh-socket) module. 
+The mbed mesh API cooperates with module [mbed mesh socket](https://github.com/ARMmbed/sal-iface-6lowpan). 
 The module lists the known mesh socket limitations. Full documentation of the IPv6/6LoWPAN 
-stack can be found in [IPv6/6LoWPAN stack](https://github.com/ARMmbed/mbed-6lowpan-private).
-
+stack can be found in [IPv6/6LoWPAN stack](https://github.com/ARMmbed/sal-stack-nanostack).
 
 ## Usage notes
 This module should not be used directly by applications. Applications should 
@@ -26,8 +25,10 @@ use the following modules when they are available:
 This module is under construction and therefore, there are some limitations as follows:
 
 * Node is statically configured to router mode.
-* Beacon scan takes place on channel 12 (2,4 Ghz). You can change this by setting 
- `CONFIGURED_SCAN_CHANNEL` to some other channel in file `mesh_tasklet.c`
+* In 6LoWPAN-ND mode beacon scan takes place on channel 12 (2.4Ghz). You can change 
+ this by setting `DEFAULT_SCAN_CHANNEL` to some other channel in `./source/include/static_config.h`.
+* In Thread bootstrap mode RF channel is set to channel 12 (2.4GHz). You can change
+ this by updating `THREAD_RF_CHANNEL` in `./source/include/static_config.h`
 
 ### Network connection states
 After the initialization, the network state is `MESH_DISCONNECTED`. After a successful connection, 
@@ -42,7 +43,7 @@ client is allowed to attempt connecting again.
 This module contains an example application in the `./test/6lowpan_nd/main.cpp` folder. 
 To build and run the example, see the [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
 
-## Usage examples
+## Usage example for 6LoWPAN ND mode
 
 Create a callback function to catch the network status:
 ```
@@ -53,11 +54,46 @@ void mesh_api_callback(mesh_connection_status_t mesh_status)
 ```
 Create a Mesh6LoWPAN_ND class:
 ```C++
-Mesh6LoWPAN_ND *meshApi = Mesh6LoWPAN_ND::getInstance();
+Mesh6LoWPAN_ND *meshApi = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 ```
-Initialize the object with a registered RF device and create callback:
+Initialize the object with a registered RF device and callback:
 ```C++
 meshApi->init(rf_device_register(), mesh_api_callback);
+```
+Connect to the mesh network:
+```C++
+meshApi->connect();
+```
+Wait for the callback to be called and once successfully connected to the mesh network, create a socket and 
+start communication with the remote end:
+```
+if (network_state == MESH_CONNECTED) {
+    UDPaSocket s(SOCKET_STACK_NANOSTACK_IPV6);
+    s.open(SOCKET_AF_INET6);
+	/* start communication */
+	s.send_to(data, dlen, addr, port);
+}
+
+```
+## Usage example for 6LoWPAN Thread mode
+
+Create a callback function to catch the network status:
+```
+void mesh_api_callback(mesh_connection_status_t mesh_status)
+{
+    network_state = mesh_status;
+}
+```
+Create a MeshThread class:
+```C++
+MeshThread *meshApi = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+```
+Initialize the object with a registered RF device ID, callback, RF device MAC address and private shared key:
+```
+uint8_t eui64[8];
+rf_read_mac_address(eui64);
+char *pskd = (char*)"Secret password";
+status = meshApi->init(rf_id, mesh_network_callback, eui64, pskd);
 ```
 Connect to the mesh network:
 ```C++
