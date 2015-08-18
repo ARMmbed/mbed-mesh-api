@@ -378,7 +378,7 @@ int8_t thread_tasklet_network_init(int8_t device_id)
 
 void thread_tasklet_set_device_config(uint8_t *eui64, char* pskd)
 {
-    device_configuration.PSKd_ptr = ns_dyn_mem_alloc(strlen(pskd+1));
+    device_configuration.PSKd_ptr = ns_dyn_mem_alloc(strlen(pskd)+1);
     strcpy(device_configuration.PSKd_ptr, pskd);
     memcpy(device_configuration.eui64, eui64, 8);
     device_configuration.leaderCap = true;
