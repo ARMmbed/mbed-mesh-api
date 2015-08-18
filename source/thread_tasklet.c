@@ -79,8 +79,8 @@ void thread_tasklet_main(arm_event_s *event);
 void thread_tasklet_network_state_changed(mesh_connection_status_t status);
 void thread_tasklet_parse_network_event(arm_event_s *event);
 void thread_tasklet_configure_network(void);
-#define TRACE_ND_TASKLET
-#ifndef TRACE_MESH_TASKLET
+#define TRACE_THREAD_TASKLET
+#ifndef TRACE_THREAD_TASKLET
 #define thread_tasklet_trace_bootstrap_info() ((void) 0)
 #else
 void thread_tasklet_trace_bootstrap_info(void);
@@ -158,7 +158,7 @@ void thread_tasklet_parse_network_event(arm_event_s *event)
         /* Network is ready and node is connected to Access Point */
         if (thread_tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY)
         {
-            tr_info("Network bootstrap ready");
+            tr_info("Thread bootstrap ready");
             thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
             thread_tasklet_trace_bootstrap_info();
             thread_tasklet_network_state_changed(MESH_CONNECTED);
@@ -248,7 +248,7 @@ void thread_tasklet_configure_network(void)
     if (status >= 0)
     {
         thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_STARTED;
-        tr_info("6LoWPAN IP Bootstrap started");
+        tr_info("Start 6LoWPAN Thread bootstrap");
     }
     else
     {
@@ -271,7 +271,7 @@ void thread_tasklet_network_state_changed(mesh_connection_status_t status)
 /*
  * Trace bootstrap information.
  */
-#ifdef TRACE_MESH_TASKLET
+#ifdef TRACE_THREAD_TASKLET
 void thread_tasklet_trace_bootstrap_info()
 {
     link_layer_address_s app_link_address_info;
@@ -305,7 +305,7 @@ void thread_tasklet_trace_bootstrap_info()
     }
     tr_debug("traced bootstrap info");
 }
-#endif /* #define TRACE_MESH_TASKLET */
+#endif /* #define TRACE_THREAD_TASKLET */
 
 int8_t thread_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
 {
@@ -349,13 +349,17 @@ int8_t thread_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_i
 int8_t thread_tasklet_disconnect()
 {
     int8_t status = -1;
-    if (thread_tasklet_data_ptr->nwk_if_id != INVALID_INTERFACE_ID)
+    // check that init has been called
+    if (thread_tasklet_data_ptr != NULL)
     {
-        status = arm_nwk_interface_down(thread_tasklet_data_ptr->nwk_if_id);
-        thread_tasklet_data_ptr->nwk_if_id = INVALID_INTERFACE_ID;
+        if (thread_tasklet_data_ptr->nwk_if_id != INVALID_INTERFACE_ID)
+        {
+            status = arm_nwk_interface_down(thread_tasklet_data_ptr->nwk_if_id);
+            thread_tasklet_data_ptr->nwk_if_id = INVALID_INTERFACE_ID;
+        }
+        // in any case inform client that we are in disconnected state
+        thread_tasklet_network_state_changed(MESH_DISCONNECTED);
     }
-    // in any case inform client that we are in disconnected state
-    thread_tasklet_network_state_changed(MESH_DISCONNECTED);
     return status;
 }
 

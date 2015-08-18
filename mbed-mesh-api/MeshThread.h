@@ -43,8 +43,6 @@ public:
 
     // virtual methods from AbstractMesh
     int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
-    int8_t connect();
-    int8_t disconnect();
 
     friend class MeshInterfaceFactory;
 

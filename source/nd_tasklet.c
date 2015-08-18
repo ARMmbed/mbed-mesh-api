@@ -147,7 +147,7 @@ void nd_tasklet_parse_network_event(arm_event_s *event)
         /* Network is ready and node is connected to Access Point */
         if (tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY)
         {
-            tr_info("Network bootstrap ready");
+            tr_info("6LoWPAN ND bootstrap ready");
             tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
             nd_tasklet_trace_bootstrap_info();
             nd_tasklet_network_state_changed(MESH_CONNECTED);
@@ -221,7 +221,7 @@ void nd_tasklet_configure_network(void)
     if (status >= 0)
     {
         tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_STARTED;
-        tr_info("6LoWPAN IP Bootstrap started");
+        tr_info("Start 6LoWPAN ND Bootstrap");
     }
     else
     {
@@ -375,13 +375,17 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
 int8_t nd_tasklet_disconnect()
 {
     int8_t status = -1;
-    if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID)
+    // check that init has been called
+    if (tasklet_data_ptr != NULL)
     {
-        status = arm_nwk_interface_down(tasklet_data_ptr->network_interface_id);
-        tasklet_data_ptr->network_interface_id = INVALID_INTERFACE_ID;
+        if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID)
+        {
+            status = arm_nwk_interface_down(tasklet_data_ptr->network_interface_id);
+            tasklet_data_ptr->network_interface_id = INVALID_INTERFACE_ID;
+        }
+        // in any case inform client that we are in disconnected state
+        nd_tasklet_network_state_changed(MESH_DISCONNECTED);
     }
-    // in any case inform client that we are in disconnected state
-    nd_tasklet_network_state_changed(MESH_DISCONNECTED);
     return status;
 }
 

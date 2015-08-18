@@ -26,7 +26,7 @@
 
 #define TRACE_GROUP  "main"     // for traces
 
-#define THREAD
+//#define TEST_THREAD
 //#define CONNECT_RECONNECT
 
 class TestMeshApi;
@@ -51,23 +51,34 @@ public:
         case 0:
             test_mesh_api_init(rf_device_id);
             break;
-#ifdef THREAD
         case 1:
+            test_mesh_api_init_thread(rf_device_id);
+            break;
+        case 2:
+            test_mesh_api_disconnect(rf_device_id, MESH_TYPE_6LOWPAN_ND);
+            break;
+        case 3:
+            test_mesh_api_disconnect(rf_device_id, MESH_TYPE_THREAD);
+            break;
+
+#ifdef TEST_THREAD
+        case 4:
             test_mesh_api_connect_disconnect_loop_thread(rf_device_id, 1 /*5*/);
             break;
 #else
-        case 1:
+        case 4:
             test_mesh_api_connect_disconnect_loop(rf_device_id, 1 /*5*/);
             break;
 #endif
 
 #ifdef CONNECT_RECONNECT
-        case 2:
+        case 5:
             // interface connect/disconnect/connect loop is not working properly,
             // therefore skip tests that require re-connecting
-            mesh_api_connect(rf_device_id);
+            test_mesh_api_connect(rf_device_id);
             break;
 #endif
+
 
         default:
             endTest(tests_pass);

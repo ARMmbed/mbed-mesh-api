@@ -123,7 +123,10 @@ int8_t AbstractMesh::connect()
     }
 }
 
-int8_t AbstractMesh::disconnect()
+/*
+ * Disable optimization as gcc compiler fails to return correct enum value.
+ */
+int8_t __attribute__((optimize("O0")))AbstractMesh::disconnect()
 {
     int8_t status = -1;
 
@@ -133,13 +136,11 @@ int8_t AbstractMesh::disconnect()
         status = nd_tasklet_disconnect();
     }
 
-    if (status < 0) {
-        status = MESH_ERROR_UNKNOWN;
-    } else {
-        status = MESH_ERROR_NONE;
+    if (status >= 0) {
+        return MESH_ERROR_NONE;
     }
 
-    return status;
+    return MESH_ERROR_UNKNOWN;
 }
 
 void AbstractMesh::callback(mesh_connection_status_t state) {
@@ -147,5 +148,3 @@ void AbstractMesh::callback(mesh_connection_status_t state) {
         minar::Scheduler::postCallback(_mesh_network_handler.bind(state));
     }
 }
-
-

@@ -28,7 +28,7 @@
 /* Heap for NanoStack */
 #define MESH_HEAP_SIZE 32500
 static uint8_t app_stack_heap[MESH_HEAP_SIZE + 1];
-static int8_t mesh_initialized = false;
+static bool mesh_initialized = false;
 
 /*
  * Heap error handler, called when heap problem is detected.

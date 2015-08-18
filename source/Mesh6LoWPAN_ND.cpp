@@ -39,21 +39,6 @@ Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
     tr_debug("~Mesh6LoWPAN()");
 }
 
-int8_t Mesh6LoWPAN_ND::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
-{
-    return AbstractMesh::init(registered_device_id, callbackHandler);
-}
-
-int8_t Mesh6LoWPAN_ND::connect()
-{
-    return AbstractMesh::connect();
-}
-
-int8_t Mesh6LoWPAN_ND::disconnect()
-{
-    return AbstractMesh::disconnect();
-}
-
 bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)
 {
     tr_debug("getOwnIpAddress()");

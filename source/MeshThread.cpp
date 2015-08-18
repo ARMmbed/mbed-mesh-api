@@ -49,7 +49,7 @@ int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callba
 
     int8_t status = AbstractMesh::init(registered_device_id, callbackHandler);
 
-    if (status >= 0 )
+    if (status == MESH_ERROR_NONE)
     {
         thread_tasklet_set_device_config(eui64, pskd);
     }
@@ -61,15 +61,5 @@ int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callba
 {
     // TODO: Use test values for device configuration
     return init(registered_device_id, callbackHandler, NULL, NULL);
-}
-
-int8_t MeshThread::connect()
-{
-    return AbstractMesh::connect();
-}
-
-int8_t MeshThread::disconnect()
-{
-    return AbstractMesh::disconnect();
 }
 
