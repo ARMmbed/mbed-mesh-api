@@ -1,14 +1,14 @@
 # mbed mesh API
 The ARM mbed mesh API allows the client to use the IPv6 mesh network.
 
-The client can use `Mesh6LoWPAN_ND` or `MeshThread`object for connecting to the 
-mesh network and once successfully connected, the client can create a socket by 
+The client can use the `Mesh6LoWPAN_ND` or `MeshThread`object for connecting to the 
+mesh network and when once successfully connected, the client can create a socket by 
 using the [mbed C++ socket API](https://github.com/ARMmbed/sockets) to start 
 communication with a remote peer. When the connection is no longer needed the client 
-can close the connection by using the `disconnect` method.
+can close the connection with the `disconnect` method.
 
 ### Supported mesh networking modes
-Currently, 6LoWPAN-ND (neighbor discovery) and Thread bootstrap modes are supported.
+Currently, 6LoWPAN-ND (neighbour discovery) and Thread bootstrap modes are supported.
 
 ### Mesh socket
 The mbed mesh API cooperates with module [mbed mesh socket](https://github.com/ARMmbed/sal-iface-6lowpan). 
@@ -16,7 +16,7 @@ The module lists the known mesh socket limitations. Full documentation of the IP
 stack can be found in [IPv6/6LoWPAN stack](https://github.com/ARMmbed/sal-stack-nanostack).
 
 ## Usage notes
-This module should not be used directly by applications. Applications should 
+This module should not be used directly by the applications. The applications should 
 use the following modules when they are available:
 
 * `connection manager`for handling network connections.
@@ -24,7 +24,7 @@ use the following modules when they are available:
 
 This module is under construction and therefore, there are some limitations as follows:
 
-* Node is statically configured to router mode.
+* A node is statically configured to router mode.
 * In 6LoWPAN-ND mode beacon scan takes place on channel 12 (2.4Ghz). You can change 
  this by setting `DEFAULT_SCAN_CHANNEL` to some other channel in `./source/include/static_config.h`.
 * In Thread bootstrap mode RF channel is set to channel 12 (2.4GHz). You can change
@@ -64,7 +64,7 @@ Connect to the mesh network:
 ```C++
 meshApi->connect();
 ```
-Wait for the callback to be called and once successfully connected to the mesh network, create a socket and 
+Wait for the callback to be called and when successfully connected to the mesh network, create a socket and 
 start communication with the remote end:
 ```
 if (network_state == MESH_CONNECTED) {
@@ -121,7 +121,7 @@ Compile the test:
 yt target frdm-k64f-gcc
 yt build
 ```
-1. Flash the FRDM-K64F with the software.
+1. Flash the software to the FRDM-K64F board.
 2. Start the serial terminal emulator.
 3. Press the **Reset** button on the board.
 4. Check the test results in the traces.
