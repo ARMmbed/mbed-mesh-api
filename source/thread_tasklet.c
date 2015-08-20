@@ -346,7 +346,7 @@ int8_t thread_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_i
     return status;
 }
 
-int8_t thread_tasklet_disconnect()
+int8_t thread_tasklet_disconnect(void)
 {
     int8_t status = -1;
     // check that init has been called
@@ -363,7 +363,7 @@ int8_t thread_tasklet_disconnect()
     return status;
 }
 
-void thread_tasklet_init()
+void thread_tasklet_init(void)
 {
     if (thread_tasklet_data_ptr == NULL)
     {

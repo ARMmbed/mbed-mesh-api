@@ -126,7 +126,13 @@ mesh_error_t AbstractMesh::connect()
 /*
  * Disable optimization as gcc compiler fails to return correct enum value.
  */
-mesh_error_t __attribute__((optimize("O0")))AbstractMesh::disconnect()
+#if defined(__arm__) && defined(__ARMCC_VERSION)
+#define DISABLE_GCC_OPT
+#else
+#define DISABLE_GCC_OPT __attribute__((optimize("O0")))
+#endif
+
+mesh_error_t DISABLE_GCC_OPT AbstractMesh::disconnect()
 {
     int8_t status = -1;
 

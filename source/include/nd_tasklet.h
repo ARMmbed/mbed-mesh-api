@@ -68,7 +68,7 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id);
  * \brief Initialize mesh system.
  * Memory pool, timers, traces and support are initialized.
  */
-void nd_tasklet_init();
+void nd_tasklet_init(void);
 
 /*
  * \brief Create network interface.
@@ -84,7 +84,7 @@ int8_t nd_tasklet_network_init(int8_t device_id);
  * \return >= 0 if disconnected successfully.
  * \return < 0 in case of errors
  */
-int8_t nd_tasklet_disconnect();
+int8_t nd_tasklet_disconnect(void);
 
 #ifdef __cplusplus
 }

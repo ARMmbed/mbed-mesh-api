@@ -372,7 +372,7 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     return status;
 }
 
-int8_t nd_tasklet_disconnect()
+int8_t nd_tasklet_disconnect(void)
 {
     int8_t status = -1;
     // check that init has been called
@@ -389,7 +389,7 @@ int8_t nd_tasklet_disconnect()
     return status;
 }
 
-void nd_tasklet_init()
+void nd_tasklet_init(void)
 {
     if (tasklet_data_ptr == NULL)
     {
