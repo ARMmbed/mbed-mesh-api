@@ -91,9 +91,10 @@ MeshThread *meshApi = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TY
 Initialize the object with a registered RF device ID, callback, RF device MAC address and private shared key:
 ```
 uint8_t eui64[8];
+int8_t rf_device = rf_device_register();
 rf_read_mac_address(eui64);
 char *pskd = (char*)"Secret password";
-status = meshApi->init(rf_id, mesh_network_callback, eui64, pskd);
+status = meshApi->init(rf_device, mesh_network_callback, eui64, pskd);
 ```
 Connect to the mesh network:
 ```C++
