@@ -39,7 +39,7 @@ MeshThread::~MeshThread()
     tr_debug("~MeshThread()");
 }
 
-int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler, uint8_t *eui64, char* pskd)
+mesh_error_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler, uint8_t *eui64, char* pskd)
 {
 
     if (eui64 == NULL || pskd == NULL)
@@ -47,7 +47,7 @@ int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callba
         return MESH_ERROR_PARAM;
     }
 
-    int8_t status = AbstractMesh::init(registered_device_id, callbackHandler);
+    mesh_error_t status = AbstractMesh::init(registered_device_id, callbackHandler);
 
     if (status == MESH_ERROR_NONE)
     {
@@ -57,9 +57,9 @@ int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callba
     return status;
 }
 
-int8_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
+mesh_error_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
 {
     // TODO: Use test values for device configuration
-    return init(registered_device_id, callbackHandler, NULL, NULL);
+    return MeshThread::init(registered_device_id, callbackHandler, NULL, NULL);
 }
 

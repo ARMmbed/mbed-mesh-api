@@ -46,7 +46,7 @@ void test_callback_connect_disconnect(mesh_connection_status_t mesh_state)
     mesh_network_state = mesh_state;
     if (mesh_network_state == MESH_CONNECTED) {
         tr_info("Connected to mesh network!");
-        int8_t err = mesh_api->disconnect();
+        mesh_error_t err = mesh_api->disconnect();
         TEST_EQ(err, MESH_ERROR_NONE);
     } else if (mesh_network_state == MESH_DISCONNECTED) {
         tr_info("Disconnected from mesh network!");
@@ -63,7 +63,7 @@ void test_callback_connect_disconnect(mesh_connection_status_t mesh_state)
 
 void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
 {
-    int8_t err;
+    mesh_error_t err;
     mesh_api = MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
     err = mesh_api->init(rf_device_id, test_callback_connect_disconnect);
 
@@ -85,7 +85,7 @@ void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_cou
 
 void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count)
 {
-    int8_t err;
+    mesh_error_t err;
     mesh_api = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
     uint8_t eui64[8];
     char *pskd;
@@ -118,7 +118,7 @@ void test_callback_init(mesh_connection_status_t mesh_state)
 
 void test_mesh_api_init(int8_t rf_device_id)
 {
-    int8_t err;
+    mesh_error_t err;
     mesh_api = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
     do {
@@ -158,7 +158,7 @@ void test_mesh_api_init(int8_t rf_device_id)
 
 void test_mesh_api_init_thread(int8_t rf_device_id)
 {
-    int8_t err;
+    mesh_error_t err;
     uint8_t eui64[8];
     char *pskd;
     rf_read_mac_address(eui64);
@@ -228,7 +228,7 @@ void test_mesh_api_init_thread(int8_t rf_device_id)
  */
 void test_callback_connect(mesh_connection_status_t mesh_state)
 {
-    int8_t err;
+    mesh_error_t err;
     tr_info("test_callback_connect() %d", mesh_state);
     mesh_network_state = mesh_state;
 
@@ -266,14 +266,14 @@ void test_callback_connect(mesh_connection_status_t mesh_state)
 
 void test_mesh_api_connect(int8_t rf_device_id)
 {
-    int8_t err;
+    mesh_error_t err;
     mesh_api = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
     do
     {
         // connect uninitialized
         err = mesh_api->connect();
-        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
             TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
             break;
@@ -313,7 +313,7 @@ void test_callback_disconnect(mesh_connection_status_t mesh_state)
 
 void test_mesh_api_disconnect(int8_t rf_device_id, MeshNetworkType type)
 {
-    int8_t err = 0;
+    mesh_error_t err;
     mesh_api = MeshInterfaceFactory::createInterface(type);
 
     do {

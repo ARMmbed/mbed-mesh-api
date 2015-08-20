@@ -26,6 +26,12 @@
 
 #define TRACE_GROUP  "main"     // for traces
 
+/**
+ * NOTE! Reconnecting to mesh network fails after one connect-disconnect sequence,
+ * some tests are flagged out due this bug.
+ * Thread and ND tests can't be executed at the same time.
+ */
+
 //#define TEST_THREAD
 //#define CONNECT_RECONNECT
 

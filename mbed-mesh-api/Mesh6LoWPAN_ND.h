@@ -27,7 +27,7 @@ class Mesh6LoWPAN_ND : public AbstractMesh {
 
 public:
 
-    ~Mesh6LoWPAN_ND();
+    virtual ~Mesh6LoWPAN_ND();
 
     /**
      * \brief Read own global IP address

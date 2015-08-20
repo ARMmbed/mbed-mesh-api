@@ -47,7 +47,7 @@ AbstractMesh::~AbstractMesh()
     __abstract_mesh_interface = NULL;
 }
 
-int8_t AbstractMesh::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
+mesh_error_t AbstractMesh::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
 {
     tr_debug("init()");
 
@@ -84,15 +84,15 @@ int8_t AbstractMesh::init(int8_t registered_device_id, MeshNetworkHandler_t call
     return MESH_ERROR_UNKNOWN;
 }
 
-int8_t AbstractMesh::connect()
+mesh_error_t AbstractMesh::connect()
 {
     int8_t status = -9; // init to unknown error
     tr_debug("connect()");
 
     if (_mesh_network_handler == (MeshNetworkHandler_t)NULL)
     {
-        // initialization hasn't been made
-        return MESH_ERROR_UNKNOWN;
+        // initialization hasn't been made and connect gets called
+        return MESH_ERROR_PARAM;
     }
 
     if (_type == MESH_TYPE_THREAD) {
@@ -126,7 +126,7 @@ int8_t AbstractMesh::connect()
 /*
  * Disable optimization as gcc compiler fails to return correct enum value.
  */
-int8_t __attribute__((optimize("O0")))AbstractMesh::disconnect()
+mesh_error_t __attribute__((optimize("O0")))AbstractMesh::disconnect()
 {
     int8_t status = -1;
 
