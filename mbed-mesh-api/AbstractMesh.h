@@ -28,7 +28,8 @@
 
 using namespace mbed;
 
-class AbstractMesh : public AbstractNetworkInterface {
+class AbstractMesh : public AbstractNetworkInterface
+{
 
 public:
 

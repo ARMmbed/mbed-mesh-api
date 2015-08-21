@@ -26,7 +26,8 @@
  *  object for application to utilize mesh networking.
  */
 
-class MeshInterfaceFactory {
+class MeshInterfaceFactory
+{
 
 public:
 
@@ -40,10 +41,10 @@ public:
 
 private:
     // Prevents the use of assignment operator by accident.
-    MeshInterfaceFactory& operator=( const MeshInterfaceFactory& /*other*/ );
+    MeshInterfaceFactory &operator=(const MeshInterfaceFactory & /*other*/);
 
     // Prevents the use of copy constructor by accident
-    MeshInterfaceFactory( const MeshInterfaceFactory& /*other*/ );
+    MeshInterfaceFactory(const MeshInterfaceFactory & /*other*/);
 };
 
 #endif /* __MESHINTERFACEFACTORY_H__ */

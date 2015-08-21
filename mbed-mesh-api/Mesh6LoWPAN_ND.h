@@ -23,7 +23,8 @@
  * \brief 6LoWPAN ND mesh networking class.
  */
 
-class Mesh6LoWPAN_ND : public AbstractMesh {
+class Mesh6LoWPAN_ND : public AbstractMesh
+{
 
 public:
 
@@ -58,8 +59,8 @@ private:
     /*
      * avoid copy/assign object
      */
-    Mesh6LoWPAN_ND(Mesh6LoWPAN_ND const& copy);
-    Mesh6LoWPAN_ND & operator=(Mesh6LoWPAN_ND const& copy);
+    Mesh6LoWPAN_ND(Mesh6LoWPAN_ND const &copy);
+    Mesh6LoWPAN_ND &operator=(Mesh6LoWPAN_ND const &copy);
 };
 
 #endif /* __MESH6LOWPAN_ND_H__ */

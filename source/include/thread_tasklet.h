@@ -61,7 +61,7 @@ int8_t thread_tasklet_network_init(int8_t device_id);
  * \param eui64 mac address of the registered rf device
  * \param pskd private shared key
  */
-void thread_tasklet_set_device_config(uint8_t *eui64, char* pskd);
+void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd);
 
 /*
  * \brief Disconnect network interface.

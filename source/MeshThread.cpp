@@ -39,18 +39,16 @@ MeshThread::~MeshThread()
     tr_debug("~MeshThread()");
 }
 
-mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char* pskd)
+mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char *pskd)
 {
 
-    if (eui64 == NULL || pskd == NULL)
-    {
+    if (eui64 == NULL || pskd == NULL) {
         return MESH_ERROR_PARAM;
     }
 
     mesh_error_t status = AbstractMesh::init(registered_device_id, callbackHandler);
 
-    if (status == MESH_ERROR_NONE)
-    {
+    if (status == MESH_ERROR_NONE) {
         thread_tasklet_set_device_config(eui64, pskd);
     }
 

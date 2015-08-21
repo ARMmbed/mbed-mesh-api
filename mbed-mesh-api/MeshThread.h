@@ -23,7 +23,8 @@
  * \brief 6LoWPAN Thread mesh networking class.
  */
 
-class MeshThread : public AbstractMesh {
+class MeshThread : public AbstractMesh
+{
 
 public:
 
@@ -40,7 +41,7 @@ public:
      * \return MESH_ERROR_MEMORY in case of memory error
      * \return MESH_ERROR_UNKNOWN in other error cases
      */
-    mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char* pskd);
+    mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char *pskd);
 
     /**
      * \brief Overriding initialization of the base class.
@@ -59,8 +60,8 @@ private:
     /*
      * avoid copy/assign object
      */
-    MeshThread(MeshThread const& copy);
-    MeshThread & operator=(MeshThread const& copy);
+    MeshThread(MeshThread const &copy);
+    MeshThread &operator=(MeshThread const &copy);
 };
 
 #endif /* __MESHTHREAD_H__ */

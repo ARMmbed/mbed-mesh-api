@@ -26,7 +26,7 @@ extern "C" {
  * \brief Initialize mesh system.
  * Memory pool, timers, traces and support are initialized.
  */
-void mesh_system_init();
+void mesh_system_init(void);
 
 #ifdef __cplusplus
 }

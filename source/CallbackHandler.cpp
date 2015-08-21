@@ -22,7 +22,7 @@ AbstractMesh  *__abstract_mesh_interface = NULL;
 void __mesh_handler_c_callback(mesh_connection_status_t state)
 {
 
-    if(__abstract_mesh_interface) {
+    if (__abstract_mesh_interface) {
         __abstract_mesh_interface->callback(state);
     }
 }

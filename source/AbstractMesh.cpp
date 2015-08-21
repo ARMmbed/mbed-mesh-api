@@ -51,8 +51,7 @@ mesh_error_t AbstractMesh::init(int8_t registered_device_id, mesh_network_handle
 {
     tr_debug("init()");
 
-    if (callbackHandler == (mesh_network_handler_t)NULL)
-    {
+    if (callbackHandler == (mesh_network_handler_t)NULL) {
         return MESH_ERROR_PARAM;
     }
 
@@ -68,16 +67,11 @@ mesh_error_t AbstractMesh::init(int8_t registered_device_id, mesh_network_handle
         _network_interface_id = nd_tasklet_network_init(_device_id);
     }
 
-    if (_network_interface_id >= 0)
-    {
+    if (_network_interface_id >= 0) {
         return MESH_ERROR_NONE;
-    }
-    else if (_network_interface_id == -2)
-    {
+    } else if (_network_interface_id == -2) {
         return MESH_ERROR_PARAM;
-    }
-    else if (_network_interface_id == -3)
-    {
+    } else if (_network_interface_id == -3) {
         return MESH_ERROR_MEMORY;
     }
 
@@ -89,8 +83,7 @@ mesh_error_t AbstractMesh::connect()
     int8_t status = -9; // init to unknown error
     tr_debug("connect()");
 
-    if (_mesh_network_handler == (mesh_network_handler_t)NULL)
-    {
+    if (_mesh_network_handler == (mesh_network_handler_t)NULL) {
         // initialization hasn't been made and connect gets called
         return MESH_ERROR_PARAM;
     }
@@ -101,24 +94,15 @@ mesh_error_t AbstractMesh::connect()
         status = nd_tasklet_connect(&__mesh_handler_c_callback, _network_interface_id);
     }
 
-    if (status >= 0)
-    {
+    if (status >= 0) {
         return MESH_ERROR_NONE;
-    }
-    else if (status == -1)
-    {
+    } else if (status == -1) {
         return MESH_ERROR_PARAM;
-    }
-    else if (status == -2)
-    {
+    } else if (status == -2) {
         return MESH_ERROR_MEMORY;
-    }
-    else if (status == -3)
-    {
+    } else if (status == -3) {
         return MESH_ERROR_STATE;
-    }
-    else
-    {
+    } else {
         return MESH_ERROR_UNKNOWN;
     }
 }
@@ -138,7 +122,7 @@ mesh_error_t DISABLE_GCC_OPT AbstractMesh::disconnect()
 
     if (_mesh_network_type == MESH_TYPE_THREAD) {
         status = thread_tasklet_disconnect();
-    } else if (_mesh_network_type == MESH_TYPE_6LOWPAN_ND){
+    } else if (_mesh_network_type == MESH_TYPE_6LOWPAN_ND) {
         status = nd_tasklet_disconnect();
     }
 
@@ -149,7 +133,8 @@ mesh_error_t DISABLE_GCC_OPT AbstractMesh::disconnect()
     return MESH_ERROR_UNKNOWN;
 }
 
-void AbstractMesh::callback(mesh_connection_status_t state) {
+void AbstractMesh::callback(mesh_connection_status_t state)
+{
     if (_mesh_network_handler) {
         minar::Scheduler::postCallback(_mesh_network_handler.bind(state));
     }

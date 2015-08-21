@@ -27,7 +27,8 @@
  * Note! This class will be replaced by connection manager when it is available.
  */
 
-class AbstractNetworkInterface {
+class AbstractNetworkInterface
+{
 
 public:
     /**

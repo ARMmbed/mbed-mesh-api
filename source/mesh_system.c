@@ -37,27 +37,25 @@ static bool mesh_initialized = false;
 static void mesh_system_heap_error_handler(heap_fail_t event)
 {
     tr_error("Heap error, mesh_system_heap_error_handler() %d", event);
-    switch (event)
-    {
-    case NS_DYN_MEM_NULL_FREE:
-    case NS_DYN_MEM_DOUBLE_FREE:
-    case NS_DYN_MEM_ALLOCATE_SIZE_NOT_VALID:
-    case NS_DYN_MEM_POINTER_NOT_VALID:
-    case NS_DYN_MEM_HEAP_SECTOR_CORRUPTED:
-    case NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED:
-        break;
-    default:
-        break;
+    switch (event) {
+        case NS_DYN_MEM_NULL_FREE:
+        case NS_DYN_MEM_DOUBLE_FREE:
+        case NS_DYN_MEM_ALLOCATE_SIZE_NOT_VALID:
+        case NS_DYN_MEM_POINTER_NOT_VALID:
+        case NS_DYN_MEM_HEAP_SECTOR_CORRUPTED:
+        case NS_DYN_MEM_HEAP_SECTOR_UNITIALIZED:
+            break;
+        default:
+            break;
     }
     while (1);
 }
 
-void mesh_system_init()
+void mesh_system_init(void)
 {
-    if (mesh_initialized == false)
-    {
+    if (mesh_initialized == false) {
         ns_dyn_mem_init(app_stack_heap, MESH_HEAP_SIZE,
-                mesh_system_heap_error_handler, 0);
+                        mesh_system_heap_error_handler, 0);
         randLIB_seed_random();
         platform_timer_enable();
         eventOS_scheduler_init();

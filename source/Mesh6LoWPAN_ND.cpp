@@ -42,8 +42,7 @@ Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
 bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)
 {
     tr_debug("getOwnIpAddress()");
-    if (nd_tasklet_get_ip_address(address, len) == 0)
-    {
+    if (nd_tasklet_get_ip_address(address, len) == 0) {
         return true;
     }
     return false;
@@ -52,8 +51,7 @@ bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)
 bool Mesh6LoWPAN_ND::getRouterIpAddress(char *address, int8_t len)
 {
     tr_debug("getRouterIpAddress()");
-    if (nd_tasklet_get_router_ip_address(address, len) == 0)
-    {
+    if (nd_tasklet_get_router_ip_address(address, len) == 0) {
         return true;
     }
     return false;

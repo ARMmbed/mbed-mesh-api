@@ -48,8 +48,7 @@ typedef enum {
 /*
  * Mesh tasklet data structure.
  */
-typedef struct
-{
+typedef struct {
     void (*mesh_api_cb)(mesh_connection_status_t nwk_status);
     uint32_t channel_list;
     tasklet_state_t tasklet_state;
@@ -86,43 +85,40 @@ void nd_tasklet_main(arm_event_s *event)
     arm_library_event_type_e event_type;
     event_type = (arm_library_event_type_e) event->event_type;
 
-    if (event->sender != 0)
-    {
+    if (event->sender != 0) {
         // only handling stack events
         return;
     }
 
-    switch (event_type)
-    {
-    case ARM_LIB_NWK_INTERFACE_EVENT:
-        /* This event is delivered every and each time when there is new
-         * information of network connectivity.
-         */
-        nd_tasklet_parse_network_event(event);
-    break;
+    switch (event_type) {
+        case ARM_LIB_NWK_INTERFACE_EVENT:
+            /* This event is delivered every and each time when there is new
+             * information of network connectivity.
+             */
+            nd_tasklet_parse_network_event(event);
+            break;
 
-    case ARM_LIB_TASKLET_INIT_EVENT:
-        /* Event with type EV_INIT is an initializer event of NanoStack OS.
-         * The event is delivered when the NanoStack OS is running fine.
-         * This event should be delivered ONLY ONCE.
-         */
-        tasklet_data_ptr->node_main_tasklet_id = event->receiver;
-        nd_tasklet_configure_network();
-    break;
+        case ARM_LIB_TASKLET_INIT_EVENT:
+            /* Event with type EV_INIT is an initializer event of NanoStack OS.
+             * The event is delivered when the NanoStack OS is running fine.
+             * This event should be delivered ONLY ONCE.
+             */
+            tasklet_data_ptr->node_main_tasklet_id = event->receiver;
+            nd_tasklet_configure_network();
+            break;
 
-    case ARM_LIB_SYSTEM_TIMER_EVENT:
-        eventOS_event_timer_cancel(event->event_id,
-                tasklet_data_ptr->node_main_tasklet_id);
+        case ARM_LIB_SYSTEM_TIMER_EVENT:
+            eventOS_event_timer_cancel(event->event_id,
+                                       tasklet_data_ptr->node_main_tasklet_id);
 
-        if (event->event_id == TIMER_EVENT_START_BOOTSTRAP)
-        {
-            tr_debug("Restart bootstrap");
-            arm_nwk_interface_up(tasklet_data_ptr->network_interface_id);
-        }
-    break;
+            if (event->event_id == TIMER_EVENT_START_BOOTSTRAP) {
+                tr_debug("Restart bootstrap");
+                arm_nwk_interface_up(tasklet_data_ptr->network_interface_id);
+            }
+            break;
 
-    default:
-        break;
+        default:
+            break;
     } // switch(event_type)
 }
 
@@ -141,52 +137,49 @@ void nd_tasklet_parse_network_event(arm_event_s *event)
 {
     arm_nwk_interface_status_type_e status = (arm_nwk_interface_status_type_e) event->event_data;
     tr_debug("app_parse_network_event() %d", status);
-    switch (status)
-    {
-    case ARM_NWK_BOOTSTRAP_READY:
-        /* Network is ready and node is connected to Access Point */
-        if (tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY)
-        {
-            tr_info("6LoWPAN ND bootstrap ready");
-            tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
-            nd_tasklet_trace_bootstrap_info();
-            nd_tasklet_network_state_changed(MESH_CONNECTED);
-        }
-    break;
-    case ARM_NWK_NWK_SCAN_FAIL:
-        /* Link Layer Active Scan Fail, Stack is Already at Idle state */
-        tr_debug("Link Layer Scan Fail: No Beacons");
-        tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
-    break;
-    case ARM_NWK_IP_ADDRESS_ALLOCATION_FAIL:
-        /* No ND Router at current Channel Stack is Already at Idle state */
-        tr_debug("ND Scan/ GP REG fail");
-        tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
-    break;
-    case ARM_NWK_NWK_CONNECTION_DOWN:
-        /* Connection to Access point is lost wait for Scan Result */
-        tr_debug("ND/RPL scan new network");
-        tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
-    break;
-    case ARM_NWK_NWK_PARENT_POLL_FAIL:
-        tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
-    break;
-    case ARM_NWK_AUHTENTICATION_FAIL:
-        tr_debug("Network authentication fail");
-        tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
-    break;
-    default:
-        tr_warn("Unknown event %d", status);
-    break;
+    switch (status) {
+        case ARM_NWK_BOOTSTRAP_READY:
+            /* Network is ready and node is connected to Access Point */
+            if (tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY) {
+                tr_info("6LoWPAN ND bootstrap ready");
+                tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
+                nd_tasklet_trace_bootstrap_info();
+                nd_tasklet_network_state_changed(MESH_CONNECTED);
+            }
+            break;
+        case ARM_NWK_NWK_SCAN_FAIL:
+            /* Link Layer Active Scan Fail, Stack is Already at Idle state */
+            tr_debug("Link Layer Scan Fail: No Beacons");
+            tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
+            break;
+        case ARM_NWK_IP_ADDRESS_ALLOCATION_FAIL:
+            /* No ND Router at current Channel Stack is Already at Idle state */
+            tr_debug("ND Scan/ GP REG fail");
+            tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
+            break;
+        case ARM_NWK_NWK_CONNECTION_DOWN:
+            /* Connection to Access point is lost wait for Scan Result */
+            tr_debug("ND/RPL scan new network");
+            tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
+            break;
+        case ARM_NWK_NWK_PARENT_POLL_FAIL:
+            tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
+            break;
+        case ARM_NWK_AUHTENTICATION_FAIL:
+            tr_debug("Network authentication fail");
+            tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
+            break;
+        default:
+            tr_warn("Unknown event %d", status);
+            break;
     }
 
-    if (tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY)
-    {
+    if (tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY) {
         // Set 5s timer for new network scan
         eventOS_event_timer_request(TIMER_EVENT_START_BOOTSTRAP,
-                ARM_LIB_SYSTEM_TIMER_EVENT,
-                tasklet_data_ptr->node_main_tasklet_id,
-                5000);
+                                    ARM_LIB_SYSTEM_TIMER_EVENT,
+                                    tasklet_data_ptr->node_main_tasklet_id,
+                                    5000);
     }
 }
 
@@ -200,31 +193,28 @@ void nd_tasklet_configure_network(void)
 
     // configure bootstrap
     arm_nwk_interface_configure_6lowpan_bootstrap_set(
-            tasklet_data_ptr->network_interface_id, tasklet_data_ptr->mode,
-            NET_6LOWPAN_ND_WITH_MLE);
+        tasklet_data_ptr->network_interface_id, tasklet_data_ptr->mode,
+        NET_6LOWPAN_ND_WITH_MLE);
 
     // configure link layer security
     arm_nwk_link_layer_security_mode(
-            tasklet_data_ptr->network_interface_id,
-            tasklet_data_ptr->sec_mode, tasklet_data_ptr->psk_sec_info.key_id, &tasklet_data_ptr->psk_sec_info);
+        tasklet_data_ptr->network_interface_id,
+        tasklet_data_ptr->sec_mode, tasklet_data_ptr->psk_sec_info.key_id, &tasklet_data_ptr->psk_sec_info);
 
     // configure scan parameters
     arm_nwk_6lowpan_link_scan_paramameter_set(
-            tasklet_data_ptr->network_interface_id,
-            tasklet_data_ptr->channel_list, 5);
+        tasklet_data_ptr->network_interface_id,
+        tasklet_data_ptr->channel_list, 5);
 
     // Configure scan options (NULL disables filter)
     arm_nwk_6lowpan_link_nwk_id_filter_for_nwk_scan(
-            tasklet_data_ptr->network_interface_id, NULL);
+        tasklet_data_ptr->network_interface_id, NULL);
 
     status = arm_nwk_interface_up(tasklet_data_ptr->network_interface_id);
-    if (status >= 0)
-    {
+    if (status >= 0) {
         tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_STARTED;
         tr_info("Start 6LoWPAN ND Bootstrap");
-    }
-    else
-    {
+    } else {
         tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
         tr_err("Bootstrap start failed, %d", status);
         nd_tasklet_network_state_changed(MESH_BOOTSTRAP_START_FAILED);
@@ -251,12 +241,9 @@ void nd_tasklet_trace_bootstrap_info()
     link_layer_address_s app_link_address_info;
     uint8_t temp_ipv6[16];
     if (arm_nwk_nd_address_read(tasklet_data_ptr->network_interface_id,
-            &app_nd_address_info) != 0)
-    {
+                                &app_nd_address_info) != 0) {
         tr_error("ND Address read fail");
-    }
-    else
-    {
+    } else {
         tr_debug("ND Access Point:");
         printf_ipv6_address(app_nd_address_info.border_router);
 
@@ -264,20 +251,16 @@ void nd_tasklet_trace_bootstrap_info()
         printf_array(app_nd_address_info.prefix, 8);
 
         if (arm_net_address_get(tasklet_data_ptr->network_interface_id,
-                ADDR_IPV6_GP, temp_ipv6) == 0)
-        {
+                                ADDR_IPV6_GP, temp_ipv6) == 0) {
             tr_debug("GP IPv6:");
             printf_ipv6_address(temp_ipv6);
         }
     }
 
     if (arm_nwk_mac_address_read(tasklet_data_ptr->network_interface_id,
-            &app_link_address_info) != 0)
-    {
+                                 &app_link_address_info) != 0) {
         tr_error("MAC Address read fail\n");
-    }
-    else
-    {
+    } else {
         uint8_t temp[2];
         tr_debug("MAC 16-bit:");
         common_write_16_bit(app_link_address_info.PANId, temp);
@@ -298,14 +281,11 @@ int8_t nd_tasklet_get_ip_address(char *address, int8_t len)
     uint8_t binary_ipv6[16];
 
     if ((len >= 40) && (0 == arm_net_address_get(
-            tasklet_data_ptr->network_interface_id, ADDR_IPV6_GP, binary_ipv6)))
-    {
+                            tasklet_data_ptr->network_interface_id, ADDR_IPV6_GP, binary_ipv6))) {
         ip6tos(binary_ipv6, address);
         //tr_debug("IP address: %s", address);
         return 0;
-    }
-    else
-    {
+    } else {
         return -1;
     }
 }
@@ -315,14 +295,11 @@ int8_t nd_tasklet_get_router_ip_address(char *address, int8_t len)
     network_layer_address_s nd_address;
 
     if ((len >= 40) && (0 == arm_nwk_nd_address_read(
-            tasklet_data_ptr->network_interface_id, &nd_address)))
-    {
+                            tasklet_data_ptr->network_interface_id, &nd_address))) {
         ip6tos(nd_address.border_router, address);
         //tr_debug("Router IP address: %s", address);
         return 0;
-    }
-    else
-    {
+    } else {
         return -1;
     }
 }
@@ -332,13 +309,11 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     int8_t status = 0;
     int8_t re_connecting = true;
 
-    if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID)
-    {
+    if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID) {
         return -3;  // already connected to network
     }
 
-    if (tasklet_data_ptr->tasklet_state == TASKLET_STATE_CREATED)
-    {
+    if (tasklet_data_ptr->tasklet_state == TASKLET_STATE_CREATED) {
         re_connecting = false;
     }
 
@@ -353,19 +328,15 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     tasklet_data_ptr->sec_mode = NET_SEC_MODE_NO_LINK_SECURITY;
     //tasklet_data_ptr->psk_sec_info.key_id = 0;
 
-    if (re_connecting == false)
-    {
+    if (re_connecting == false) {
         int8_t status = eventOS_event_handler_create(&nd_tasklet_main,
-                ARM_LIB_TASKLET_INIT_EVENT);
-        if (status < 0)
-        {
+                        ARM_LIB_TASKLET_INIT_EVENT);
+        if (status < 0) {
             // -1 handler already used by other tasklet
             // -2 memory allocation failure
             return status;
         }
-    }
-    else
-    {
+    } else {
         nd_tasklet_configure_network();
     }
 
@@ -376,10 +347,8 @@ int8_t nd_tasklet_disconnect(void)
 {
     int8_t status = -1;
     // check that init has been called
-    if (tasklet_data_ptr != NULL)
-    {
-        if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID)
-        {
+    if (tasklet_data_ptr != NULL) {
+        if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID) {
             status = arm_nwk_interface_down(tasklet_data_ptr->network_interface_id);
             tasklet_data_ptr->network_interface_id = INVALID_INTERFACE_ID;
         }
@@ -391,8 +360,7 @@ int8_t nd_tasklet_disconnect(void)
 
 void nd_tasklet_init(void)
 {
-    if (tasklet_data_ptr == NULL)
-    {
+    if (tasklet_data_ptr == NULL) {
         // memory allocation will not fail as memory was just initialized
         tasklet_data_ptr = ns_dyn_mem_alloc(sizeof(tasklet_data_str_t));
         tasklet_data_ptr->tasklet_state = TASKLET_STATE_CREATED;
@@ -404,6 +372,6 @@ int8_t nd_tasklet_network_init(int8_t device_id)
 {
     // TODO, read interface name from configuration
     return arm_nwk_interface_init(NET_INTERFACE_RF_6LOWPAN, device_id,
-            INTERFACE_NAME);
+                                  INTERFACE_NAME);
 }
 
