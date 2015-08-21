@@ -23,7 +23,7 @@
 #include "include/callback_handler.h"
 #include "mbed-mesh-api/MeshInterfaceFactory.h"
 
-AbstractMesh* MeshInterfaceFactory::createInterface(const MeshNetworkType &type)
+AbstractMesh* MeshInterfaceFactory::createInterface(const mesh_network_type_t &type)
 {
     AbstractMesh *meshInstance = NULL;
 

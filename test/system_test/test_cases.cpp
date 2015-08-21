@@ -311,7 +311,7 @@ void test_callback_disconnect(mesh_connection_status_t mesh_state)
     test_result_notify(test_pass_global, mesh_api);
 }
 
-void test_mesh_api_disconnect(int8_t rf_device_id, MeshNetworkType type)
+void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type)
 {
     mesh_error_t err;
     mesh_api = MeshInterfaceFactory::createInterface(type);

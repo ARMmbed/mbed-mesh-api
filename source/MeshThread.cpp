@@ -39,7 +39,7 @@ MeshThread::~MeshThread()
     tr_debug("~MeshThread()");
 }
 
-mesh_error_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler, uint8_t *eui64, char* pskd)
+mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char* pskd)
 {
 
     if (eui64 == NULL || pskd == NULL)
@@ -57,7 +57,7 @@ mesh_error_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t 
     return status;
 }
 
-mesh_error_t MeshThread::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
+mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler)
 {
     // TODO: Use test values for device configuration
     return MeshThread::init(registered_device_id, callbackHandler, NULL, NULL);

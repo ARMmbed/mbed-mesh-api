@@ -40,13 +40,13 @@ public:
      * \return MESH_ERROR_MEMORY in case of memory error
      * \return MESH_ERROR_UNKNOWN in other error cases
      */
-    mesh_error_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler, uint8_t *eui64, char* pskd);
+    mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char* pskd);
 
     /**
      * \brief Overriding initialization of the base class.
      * Use method init(int8_t, MeshNetworkHandler_t, uint8_t*, char*)
      */
-    virtual mesh_error_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
+    virtual mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler);
 
     friend class MeshInterfaceFactory;
 

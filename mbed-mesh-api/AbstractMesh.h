@@ -35,13 +35,13 @@ public:
     /**
      * Typedef for network callback
      */
-    typedef FunctionPointer1<void, mesh_connection_status_t> MeshNetworkHandler_t;
+    typedef FunctionPointer1<void, mesh_connection_status_t> mesh_network_handler_t;
 
     /**
      * Constructor
      * \param type mesh network type
      */
-    AbstractMesh(MeshNetworkType type);
+    AbstractMesh(mesh_network_type_t type);
 
     // Destructor, force derived classes to implement own destructors
     // and prevent class creation.
@@ -56,7 +56,7 @@ public:
      * \return MESH_ERROR_MEMORY in case of memory error
      * \return MESH_ERROR_UNKNOWN in other error cases
      */
-    virtual mesh_error_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
+    virtual mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler);
 
     /**
      * \brief Connect interface to the mesh network
@@ -86,7 +86,7 @@ protected:
     /*
      * Mesh callback function
      */
-    MeshNetworkHandler_t _mesh_network_handler;
+    mesh_network_handler_t _mesh_network_handler;
 
     /*
      * Network interface ID
@@ -101,7 +101,7 @@ protected:
     /*
      * Mesh network type
      */
-    MeshNetworkType _type;
+    mesh_network_type_t _mesh_network_type;
 };
 
 #endif /* __ABSTRACTMESH_H__ */

@@ -25,6 +25,6 @@ void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t l
 void test_mesh_api_init(int8_t rf_device_id);
 void test_mesh_api_init_thread(int8_t rf_device_id);
 void test_mesh_api_connect(int8_t rf_device_id);
-void test_mesh_api_disconnect(int8_t rf_device_id, MeshNetworkType type);
+void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type);
 
 #endif /* __TEST_CASES__H__ */

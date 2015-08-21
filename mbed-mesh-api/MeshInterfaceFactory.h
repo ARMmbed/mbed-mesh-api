@@ -36,7 +36,7 @@ public:
      * \param type, type of the mesh network.
      * \return M2MInterfaceImpl , Object to manage other LWM2M operations.
      */
-    static AbstractMesh *createInterface(const MeshNetworkType &type);
+    static AbstractMesh *createInterface(const mesh_network_type_t &type);
 
 private:
     // Prevents the use of assignment operator by accident.

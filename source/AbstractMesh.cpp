@@ -32,11 +32,11 @@
 
 #define TRACE_GROUP  "m6La"
 
-AbstractMesh::AbstractMesh(MeshNetworkType type) :
+AbstractMesh::AbstractMesh(mesh_network_type_t type) :
     _mesh_network_handler(NULL), _network_interface_id(-1), _device_id(-1)
 {
     __abstract_mesh_interface = this;
-    _type = type;
+    _mesh_network_type = type;
     // initialize mesh networking resources, memory, timers, etc...
     mesh_system_init();
 }
@@ -47,11 +47,11 @@ AbstractMesh::~AbstractMesh()
     __abstract_mesh_interface = NULL;
 }
 
-mesh_error_t AbstractMesh::init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler)
+mesh_error_t AbstractMesh::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler)
 {
     tr_debug("init()");
 
-    if (callbackHandler == (MeshNetworkHandler_t)NULL)
+    if (callbackHandler == (mesh_network_handler_t)NULL)
     {
         return MESH_ERROR_PARAM;
     }
@@ -60,10 +60,10 @@ mesh_error_t AbstractMesh::init(int8_t registered_device_id, MeshNetworkHandler_
     _mesh_network_handler = callbackHandler;
 
     // Create network interface
-    if (_type == MESH_TYPE_THREAD) {
+    if (_mesh_network_type == MESH_TYPE_THREAD) {
         thread_tasklet_init();
         _network_interface_id = thread_tasklet_network_init(_device_id);
-    } else if (_type == MESH_TYPE_6LOWPAN_ND) {
+    } else if (_mesh_network_type == MESH_TYPE_6LOWPAN_ND) {
         nd_tasklet_init();
         _network_interface_id = nd_tasklet_network_init(_device_id);
     }
@@ -89,15 +89,15 @@ mesh_error_t AbstractMesh::connect()
     int8_t status = -9; // init to unknown error
     tr_debug("connect()");
 
-    if (_mesh_network_handler == (MeshNetworkHandler_t)NULL)
+    if (_mesh_network_handler == (mesh_network_handler_t)NULL)
     {
         // initialization hasn't been made and connect gets called
         return MESH_ERROR_PARAM;
     }
 
-    if (_type == MESH_TYPE_THREAD) {
+    if (_mesh_network_type == MESH_TYPE_THREAD) {
         status = thread_tasklet_connect(&__mesh_handler_c_callback, _network_interface_id);
-    } else if (_type == MESH_TYPE_6LOWPAN_ND) {
+    } else if (_mesh_network_type == MESH_TYPE_6LOWPAN_ND) {
         status = nd_tasklet_connect(&__mesh_handler_c_callback, _network_interface_id);
     }
 
@@ -136,9 +136,9 @@ mesh_error_t DISABLE_GCC_OPT AbstractMesh::disconnect()
 {
     int8_t status = -1;
 
-    if (_type == MESH_TYPE_THREAD) {
+    if (_mesh_network_type == MESH_TYPE_THREAD) {
         status = thread_tasklet_disconnect();
-    } else if (_type == MESH_TYPE_6LOWPAN_ND){
+    } else if (_mesh_network_type == MESH_TYPE_6LOWPAN_ND){
         status = nd_tasklet_disconnect();
     }
 
