@@ -23,16 +23,12 @@
  * \brief 6LoWPAN ND mesh networking class.
  */
 
-class Mesh6LoWPAN_ND : public AbstractMesh {
+class Mesh6LoWPAN_ND : public AbstractMesh
+{
 
 public:
 
-    ~Mesh6LoWPAN_ND();
-
-    // virtual methods from AbstractMesh
-    int8_t init(int8_t registered_device_id, MeshNetworkHandler_t callbackHandler);
-    int8_t connect();
-    int8_t disconnect();
+    virtual ~Mesh6LoWPAN_ND();
 
     /**
      * \brief Read own global IP address
@@ -63,8 +59,8 @@ private:
     /*
      * avoid copy/assign object
      */
-    Mesh6LoWPAN_ND(Mesh6LoWPAN_ND const& copy);
-    Mesh6LoWPAN_ND & operator=(Mesh6LoWPAN_ND const& copy);
+    Mesh6LoWPAN_ND(Mesh6LoWPAN_ND const &copy);
+    Mesh6LoWPAN_ND &operator=(Mesh6LoWPAN_ND const &copy);
 };
 
 #endif /* __MESH6LOWPAN_ND_H__ */

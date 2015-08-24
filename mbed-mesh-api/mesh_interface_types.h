@@ -27,7 +27,7 @@ extern "C" {
 typedef enum {
     MESH_TYPE_6LOWPAN_ND = 0,
     MESH_TYPE_THREAD
-} MeshNetworkType;
+} mesh_network_type_t;
 
 /*
  * Error status values returned by Mesh network API.

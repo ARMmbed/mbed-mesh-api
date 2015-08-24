@@ -26,7 +26,8 @@
  *  object for application to utilize mesh networking.
  */
 
-class MeshInterfaceFactory {
+class MeshInterfaceFactory
+{
 
 public:
 
@@ -36,14 +37,14 @@ public:
      * \param type, type of the mesh network.
      * \return M2MInterfaceImpl , Object to manage other LWM2M operations.
      */
-    static AbstractMesh *createInterface(const MeshNetworkType &type);
+    static AbstractMesh *createInterface(const mesh_network_type_t &type);
 
 private:
     // Prevents the use of assignment operator by accident.
-    MeshInterfaceFactory& operator=( const MeshInterfaceFactory& /*other*/ );
+    MeshInterfaceFactory &operator=(const MeshInterfaceFactory & /*other*/);
 
     // Prevents the use of copy constructor by accident
-    MeshInterfaceFactory( const MeshInterfaceFactory& /*other*/ );
+    MeshInterfaceFactory(const MeshInterfaceFactory & /*other*/);
 };
 
 #endif /* __MESHINTERFACEFACTORY_H__ */

@@ -26,7 +26,7 @@
 #define TRACE_GROUP  "mesh_appl"
 
 // Bootstrap mode, if undefined then 6LoWPAN-ND mode is used
-#define BOOTSTRAP_MODE_THREAD
+//#define BOOTSTRAP_MODE_THREAD
 
 // mesh network state
 static mesh_connection_status_t mesh_network_state = MESH_DISCONNECTED;
@@ -51,27 +51,29 @@ void mesh_network_callback(mesh_connection_status_t mesh_state)
     }
 }
 
-void app_start(int, char**) {
+void app_start(int, char **)
+{
     int8_t status;
 
     // create 6LoWPAN_ND interface
 #ifdef BOOTSTRAP_MODE_THREAD
     meshApi = MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
     uint8_t eui64[8];
+    int8_t rf_device = rf_device_register();
     rf_read_mac_address(eui64);
-    char *pskd = (char*)"Secret password";
+    char *pskd = (char *)"Secret password";
     // Use tr_info traces and RF interface after MeshAPi has been created.
     // as interface initializes mesh system that RF device is using
     tr_info("Mesh API test application - Thread mode");
     // initialize the interface with registered device and callback
-    status = ((MeshThread*)meshApi)->init(rf_device_register(), mesh_network_callback, eui64, pskd);
+    status = ((MeshThread *)meshApi)->init(rf_device, mesh_network_callback, eui64, pskd);
 #else
-    meshApi = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
+    meshApi = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
     // Use tr_info traces and RF interface after MeshAPi has been created.
     // as interface initializes mesh system that RF device is using
     tr_info("Mesh API test application - 6LoWPAN-ND mode");
     // initialize the interface with registered device and callback
-    status = ((Mesh6LoWPAN_ND*)meshApi)->init(rf_device_register(), mesh_network_callback);
+    status = ((Mesh6LoWPAN_ND *)meshApi)->init(rf_device_register(), mesh_network_callback);
 #endif
 
     // Set ns_trace configuration level

@@ -27,6 +27,11 @@
 
 #define TRACE_GROUP  "main"     // for traces
 
+#define TEST_RESULT_PRINT()\
+    do {\
+        TEST_PRINT("{{summary %s [%s] (%d/%d FAILED)}}\r\n", __func__, (TEST_RESULT()?"PASS":"FAIL"), tests_failed_global, tests_total_global);\
+    }while (0)
+
 static uint8_t mesh_network_state = MESH_DISCONNECTED;
 AbstractMesh *mesh_api = NULL;
 
@@ -41,32 +46,33 @@ void test_callback_connect_disconnect(mesh_connection_status_t mesh_state)
     mesh_network_state = mesh_state;
     if (mesh_network_state == MESH_CONNECTED) {
         tr_info("Connected to mesh network!");
-        int8_t err = mesh_api->disconnect();
+        mesh_error_t err = mesh_api->disconnect();
         TEST_EQ(err, MESH_ERROR_NONE);
     } else if (mesh_network_state == MESH_DISCONNECTED) {
         tr_info("Disconnected from mesh network!");
+        TEST_RESULT_PRINT();
         test_result_notify(test_pass_global, mesh_api);
     } else {
         // untested branch, catch erros by bad state checking...
         TEST_EQ(mesh_network_state, MESH_CONNECTED);
         tr_error("Networking error!");
+        TEST_RESULT_PRINT();
         test_result_notify(test_pass_global, mesh_api);
     }
 }
 
 void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
 {
-    int8_t err;
+    mesh_error_t err;
     mesh_api = MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
     err = mesh_api->init(rf_device_id, test_callback_connect_disconnect);
 
-    if (!TEST_EQ(err, MESH_ERROR_NONE))
-    {
+    if (!TEST_EQ(err, MESH_ERROR_NONE)) {
         test_result_notify(test_pass_global, mesh_api);
         return;
     }
 
-    for(int i=0; i<loop_count; i++) {
+    for (int i = 0; i < loop_count; i++) {
         err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             test_result_notify(test_pass_global, mesh_api);
@@ -78,23 +84,24 @@ void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_cou
 
 void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count)
 {
-    int8_t err;
-    mesh_api = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+    mesh_error_t err;
+    mesh_api = (MeshThread *)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
     uint8_t eui64[8];
     char *pskd;
     rf_read_mac_address(eui64);
-    pskd = (char*)"Secret password";
-    err = ((MeshThread*)mesh_api)->init(rf_device_id, test_callback_connect_disconnect, eui64, pskd);
+    pskd = (char *)"Secret password";
+    err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_connect_disconnect, eui64, pskd);
 
-    if (!TEST_EQ(err, MESH_ERROR_NONE))
-    {
+    if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+        TEST_RESULT_PRINT();
         test_result_notify(test_pass_global, mesh_api);
         return;
     }
 
-    for(int i=0; i<loop_count; i++) {
+    for (int i = 0; i < loop_count; i++) {
         err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
             break;
         }
@@ -109,41 +116,97 @@ void test_callback_init(mesh_connection_status_t mesh_state)
 
 void test_mesh_api_init(int8_t rf_device_id)
 {
-    int8_t err;
-    mesh_api = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
+    mesh_error_t err;
+    mesh_api = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
-    do
-    {
+    do {
         // no callback set
         err = mesh_api->init(rf_device_id, NULL);
-        if (!TEST_EQ(err, MESH_ERROR_PARAM))
-        {
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
             break;
         }
 
         // bad rf-device_id
-        err = mesh_api->init(rf_device_id+1, test_callback_init);
-        if (!TEST_EQ(err, MESH_ERROR_MEMORY))
-        {
+        err = mesh_api->init(rf_device_id + 1, test_callback_init);
+        if (!TEST_EQ(err, MESH_ERROR_MEMORY)) {
             break;
         }
 
         // successful re-initialization
         err = mesh_api->init(rf_device_id, test_callback_init);
-        if (!TEST_EQ(err, MESH_ERROR_NONE))
-        {
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             break;
         }
 
         /* Thread can't be instantiated if ND is initialized */
-        MeshThread *meshThread = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
-        if (!TEST_EQ(meshThread, NULL))
-        {
+        MeshThread *meshThread = (MeshThread *)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+        if (!TEST_EQ(meshThread, NULL)) {
             break;
         }
         break;
-    } while(1);
+    } while (1);
 
+    TEST_RESULT_PRINT();
+    test_result_notify(test_pass_global, mesh_api);
+}
+
+void test_mesh_api_init_thread(int8_t rf_device_id)
+{
+    mesh_error_t err;
+    uint8_t eui64[8];
+    char *pskd;
+    rf_read_mac_address(eui64);
+    pskd = (char *)"Secret password";
+
+    mesh_api = MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+
+    do {
+        // no callback set
+        err = ((MeshThread *)mesh_api)->init(rf_device_id, NULL);
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
+            break;
+        }
+
+        // No address in eui64
+        err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_init, NULL, pskd);
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
+            break;
+        }
+
+        // no PSK
+        err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_init, eui64, NULL);
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
+            break;
+        }
+
+        // bad rf-device_id
+        err = ((MeshThread *)mesh_api)->init(rf_device_id + 1, test_callback_init, eui64, pskd);
+        if (!TEST_EQ(err, MESH_ERROR_MEMORY)) {
+            break;
+        }
+
+        // successful re-initialization
+        err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_init, eui64, pskd);
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            break;
+        }
+
+        /* Thread can't be instantiated if it has been initialized already */
+        MeshThread *apiThread = (MeshThread *)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+        if (!TEST_EQ(apiThread, NULL)) {
+            break;
+        }
+
+        /* 6LoWPAN ND can't be instantiated if Thread has been initialized */
+        Mesh6LoWPAN_ND *apiND = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
+        if (!TEST_EQ(apiND, NULL)) {
+            break;
+        }
+
+        break;
+    } while (1);
+
+    TEST_RESULT_PRINT();
     test_result_notify(test_pass_global, mesh_api);
 }
 
@@ -152,53 +215,55 @@ void test_mesh_api_init(int8_t rf_device_id)
  */
 void test_callback_connect(mesh_connection_status_t mesh_state)
 {
-    int8_t err;
+    mesh_error_t err;
     tr_info("test_callback_connect() %d", mesh_state);
     mesh_network_state = mesh_state;
 
     if (mesh_network_state == MESH_CONNECTED) {
         tr_info("Connected to mesh network!");
-        // try to connect again, shold fail
+        // try to connect again, should fail
         err = mesh_api->connect();
-        if (!TEST_EQ(err, MESH_ERROR_STATE))
-        {
+        if (!TEST_EQ(err, MESH_ERROR_STATE)) {
+            TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
-        }
-        else
-        {
+        } else {
             // disconnect
             err = mesh_api->disconnect();
-            if (!TEST_EQ(err, MESH_ERROR_NONE))
-            {
+            if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+                TEST_RESULT_PRINT();
                 test_result_notify(test_pass_global, mesh_api);
             }
         }
     } else if (mesh_network_state == MESH_DISCONNECTED) {
         tr_info("Disconnected from mesh network!");
+        TEST_RESULT_PRINT();
         test_result_notify(test_pass_global, mesh_api);
     } else {
         // untested branch, catch erros by bad state checking...
         TEST_EQ(mesh_network_state, MESH_CONNECTED);
         tr_error("Networking error!");
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
     }
 }
 
 void test_mesh_api_connect(int8_t rf_device_id)
 {
-    int8_t err;
-    mesh_api = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
+    mesh_error_t err;
+    mesh_api = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
-    do
-    {
+    do {
         // connect uninitialized
         err = mesh_api->connect();
-        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
+            TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
             break;
         }
 
         err = mesh_api->init(rf_device_id, test_callback_connect);
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
             break;
         }
@@ -207,12 +272,61 @@ void test_mesh_api_connect(int8_t rf_device_id)
         mesh_network_state = MESH_DISCONNECTED;
         err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
             break;
         }
 
         break;
-    } while(1);
+    } while (1);
 }
 
+/*
+ * Callback from mesh network for mesh_api_connect test
+ */
+void test_callback_disconnect(mesh_connection_status_t mesh_state)
+{
+    tr_info("test_callback_disconnect() %d", mesh_state);
+    TEST_EQ(true, false);
+    tr_error("Networking error, callback received!");
+    TEST_RESULT_PRINT();
+    test_result_notify(test_pass_global, mesh_api);
+}
 
+void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type)
+{
+    mesh_error_t err;
+    mesh_api = MeshInterfaceFactory::createInterface(type);
+
+    do {
+        // disconnect not initialized, callback not called
+        err = mesh_api->disconnect();
+        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+            break;
+        }
+
+        // initialize interface
+        if (type == MESH_TYPE_THREAD) {
+            uint8_t eui64[8];
+            char *pskd;
+            rf_read_mac_address(eui64);
+            pskd = (char *)"Secret password";
+            err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_disconnect, eui64, pskd);
+        } else {
+            err = mesh_api->init(rf_device_id, test_callback_disconnect);
+        }
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            break;
+        }
+
+        // disconnect not connected
+        err = mesh_api->disconnect();
+        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+            break;
+        }
+        break;
+    } while (1);
+
+    TEST_RESULT_PRINT();
+    test_result_notify(test_pass_global, mesh_api);
+}

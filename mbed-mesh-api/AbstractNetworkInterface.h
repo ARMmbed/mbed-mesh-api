@@ -17,6 +17,8 @@
 #ifndef __ABSTRACTNETWORKINTERFACE_H__
 #define __ABSTRACTNETWORKINTERFACE_H__
 
+#include "mesh_interface_types.h"
+
 /**
  * \brief Abstract base class for network interfaces.
  * This is a pure virtual class; it can't instantiated directly, but
@@ -25,23 +27,24 @@
  * Note! This class will be replaced by connection manager when it is available.
  */
 
-class AbstractNetworkInterface {
+class AbstractNetworkInterface
+{
 
 public:
     /**
-     * Virtual desctructor.
+     * Virtual destructor.
      */
     virtual ~AbstractNetworkInterface();
 
     /**
-     * Connect the interface.
+     * Connect the interface to the network.
      */
-    virtual int8_t connect() = 0;
+    virtual mesh_error_t connect() = 0;
 
     /**
-     * Disconnect the interface.
+     * Disconnect the interface from the network.
      */
-    virtual int8_t disconnect() = 0;
+    virtual mesh_error_t disconnect() = 0;
 };
 
 #endif /* __ABSTRACTNETWORKINTERFACE_H__ */

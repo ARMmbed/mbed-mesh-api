@@ -23,19 +23,18 @@
 #include "include/callback_handler.h"
 #include "mbed-mesh-api/MeshInterfaceFactory.h"
 
-AbstractMesh* MeshInterfaceFactory::createInterface(const MeshNetworkType &type)
+AbstractMesh *MeshInterfaceFactory::createInterface(const mesh_network_type_t &type)
 {
     AbstractMesh *meshInstance = NULL;
 
     // instance can be created only if there is no existing instance.
-    if (__abstract_mesh_interface == NULL)
-    {
+    if (__abstract_mesh_interface == NULL) {
         if (type == MESH_TYPE_6LOWPAN_ND) {
-            meshInstance = (AbstractMesh*)new Mesh6LoWPAN_ND;
+            meshInstance = (AbstractMesh *)new Mesh6LoWPAN_ND;
         }
 
         if (type == MESH_TYPE_THREAD) {
-            meshInstance = (AbstractMesh*)new MeshThread;
+            meshInstance = (AbstractMesh *)new MeshThread;
         }
     }
 
