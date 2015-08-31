@@ -55,6 +55,10 @@ void app_start(int, char **)
 {
     int8_t status;
 
+    // set tracing baud rate
+    static Serial pc(USBTX, USBRX);
+    pc.baud(115200);
+
     // create 6LoWPAN_ND interface
 #ifdef BOOTSTRAP_MODE_THREAD
     meshApi = MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);

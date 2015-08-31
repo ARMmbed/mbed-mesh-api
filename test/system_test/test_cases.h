@@ -18,13 +18,13 @@
 #define __TEST_CASES__H__
 
 /* positive cases */
-void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count);
-void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count);
+void test_mesh_api_connect_disconnect(int8_t rf_device_id, mesh_network_type_t type);
 
 /* failure cases */
 void test_mesh_api_init(int8_t rf_device_id);
 void test_mesh_api_init_thread(int8_t rf_device_id);
-void test_mesh_api_connect(int8_t rf_device_id);
+void test_mesh_api_connect(int8_t rf_device_id, mesh_network_type_t type);
 void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type);
+void test_mesh_api_delete_connected(int8_t rf_device_id, mesh_network_type_t type);
 
 #endif /* __TEST_CASES__H__ */

@@ -37,6 +37,7 @@ MeshThread::MeshThread() : AbstractMesh(MESH_TYPE_THREAD)
 MeshThread::~MeshThread()
 {
     tr_debug("~MeshThread()");
+    thread_tasklet_disconnect(false);
 }
 
 mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char *pskd)

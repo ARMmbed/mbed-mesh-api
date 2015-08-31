@@ -66,10 +66,11 @@ void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd);
 /*
  * \brief Disconnect network interface.
  *
+ * \param send_cb send possible network status change event if set to true.
  * \return >= 0 if disconnected successfully.
  * \return < 0 in case of errors
  */
-int8_t thread_tasklet_disconnect(void);
+int8_t thread_tasklet_disconnect(bool send_cb);
 
 #ifdef __cplusplus
 }

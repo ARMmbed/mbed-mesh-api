@@ -22,6 +22,7 @@
 #include "thread_management_if.h"
 #include "include/thread_tasklet.h"
 #include "include/static_config.h"
+#include "include/mesh_system.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
@@ -52,7 +53,7 @@ typedef struct {
     void (*mesh_api_cb)(mesh_connection_status_t nwk_status);
     uint32_t channel_list;
     tasklet_state_t tasklet_state;
-    int8_t node_main_tasklet_id;
+    int8_t tasklet;
 
     net_6lowpan_mode_e operating_mode;
     int8_t nwk_if_id;
@@ -76,7 +77,7 @@ static device_configuration_s device_configuration;
 void thread_tasklet_main(arm_event_s *event);
 void thread_tasklet_network_state_changed(mesh_connection_status_t status);
 void thread_tasklet_parse_network_event(arm_event_s *event);
-void thread_tasklet_configure_network(void);
+void thread_tasklet_configure_and_connect_to_network(void);
 #define TRACE_THREAD_TASKLET
 #ifndef TRACE_THREAD_TASKLET
 #define thread_tasklet_trace_bootstrap_info() ((void) 0)
@@ -113,17 +114,22 @@ void thread_tasklet_main(arm_event_s *event)
              * The event is delivered when the NanoStack OS is running fine.
              * This event should be delivered ONLY ONCE.
              */
-            thread_tasklet_data_ptr->node_main_tasklet_id = event->receiver;
-            thread_tasklet_configure_network();
+            mesh_system_send_connect_event(thread_tasklet_data_ptr->tasklet);
             break;
 
         case ARM_LIB_SYSTEM_TIMER_EVENT:
             eventOS_event_timer_cancel(event->event_id,
-                                       thread_tasklet_data_ptr->node_main_tasklet_id);
+                                       thread_tasklet_data_ptr->tasklet);
 
             if (event->event_id == TIMER_EVENT_START_BOOTSTRAP) {
                 tr_debug("Restart bootstrap");
                 arm_nwk_interface_up(thread_tasklet_data_ptr->nwk_if_id);
+            }
+            break;
+
+        case APPLICATION_EVENT:
+            if (event->event_id == APPL_EVENT_CONNECT) {
+                thread_tasklet_configure_and_connect_to_network();
             }
             break;
 
@@ -188,7 +194,7 @@ void thread_tasklet_parse_network_event(arm_event_s *event)
         // Set 5s timer for a new network scan
         eventOS_event_timer_request(TIMER_EVENT_START_BOOTSTRAP,
                                     ARM_LIB_SYSTEM_TIMER_EVENT,
-                                    thread_tasklet_data_ptr->node_main_tasklet_id,
+                                    thread_tasklet_data_ptr->tasklet,
                                     5000);
     }
 }
@@ -197,7 +203,7 @@ void thread_tasklet_parse_network_event(arm_event_s *event)
  * \brief Configure mesh network
  *
  */
-void thread_tasklet_configure_network(void)
+void thread_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
@@ -293,8 +299,8 @@ void thread_tasklet_trace_bootstrap_info()
 
 int8_t thread_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
 {
-    int8_t status = 0;
     int8_t re_connecting = true;
+    int8_t tasklet = thread_tasklet_data_ptr->tasklet;
 
     if (thread_tasklet_data_ptr->nwk_if_id != INVALID_INTERFACE_ID) {
         return -3;  // already connected to network
@@ -310,31 +316,36 @@ int8_t thread_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_i
     thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_INITIALIZED;
 
     if (re_connecting == false) {
-        int8_t status = eventOS_event_handler_create(&thread_tasklet_main,
+        thread_tasklet_data_ptr->tasklet = eventOS_event_handler_create(&thread_tasklet_main,
                         ARM_LIB_TASKLET_INIT_EVENT);
-        if (status < 0) {
+        if (thread_tasklet_data_ptr->tasklet < 0) {
             // -1 handler already used by other tasklet
             // -2 memory allocation failure
-            return status;
+            return thread_tasklet_data_ptr->tasklet;
         }
     } else {
-        thread_tasklet_configure_network();
+        thread_tasklet_data_ptr->tasklet = tasklet;
+        mesh_system_send_connect_event(thread_tasklet_data_ptr->tasklet);
     }
 
-    return status;
+    return thread_tasklet_data_ptr->tasklet;
 }
 
-int8_t thread_tasklet_disconnect(void)
+int8_t thread_tasklet_disconnect(bool send_cb)
 {
     int8_t status = -1;
-    // check that init has been called
+    // check that module is initialized
     if (thread_tasklet_data_ptr != NULL) {
         if (thread_tasklet_data_ptr->nwk_if_id != INVALID_INTERFACE_ID) {
             status = arm_nwk_interface_down(thread_tasklet_data_ptr->nwk_if_id);
             thread_tasklet_data_ptr->nwk_if_id = INVALID_INTERFACE_ID;
+            if (send_cb == true) {
+                thread_tasklet_network_state_changed(MESH_DISCONNECTED);
+            }
         }
-        // in any case inform client that we are in disconnected state
-        thread_tasklet_network_state_changed(MESH_DISCONNECTED);
+
+        // Clear callback, it will be set again in next connect
+        thread_tasklet_data_ptr->mesh_api_cb = NULL;
     }
     return status;
 }

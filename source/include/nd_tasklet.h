@@ -81,10 +81,11 @@ int8_t nd_tasklet_network_init(int8_t device_id);
 /*
  * \brief Disconnect network interface.
  *
+ * \param send_cb send possible network status change event if set to true.
  * \return >= 0 if disconnected successfully.
  * \return < 0 in case of errors
  */
-int8_t nd_tasklet_disconnect(void);
+int8_t nd_tasklet_disconnect(bool send_cb);
 
 #ifdef __cplusplus
 }

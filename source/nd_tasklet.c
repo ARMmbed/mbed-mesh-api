@@ -22,6 +22,7 @@
 #include "nsdynmemLIB.h"
 #include "include/nd_tasklet.h"
 #include "include/static_config.h"
+#include "include/mesh_system.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
@@ -57,6 +58,7 @@ typedef struct {
     net_link_layer_psk_security_info_s psk_sec_info;
     int8_t node_main_tasklet_id;
     int8_t network_interface_id;
+    int8_t tasklet;
 } tasklet_data_str_t;
 
 /* Tasklet data */
@@ -66,7 +68,7 @@ static tasklet_data_str_t *tasklet_data_ptr = NULL;
 void nd_tasklet_main(arm_event_s *event);
 void nd_tasklet_network_state_changed(mesh_connection_status_t status);
 void nd_tasklet_parse_network_event(arm_event_s *event);
-void nd_tasklet_configure_network(void);
+void nd_tasklet_configure_and_connect_to_network(void);
 #define TRACE_ND_TASKLET
 #ifndef TRACE_ND_TASKLET
 #define nd_tasklet_trace_bootstrap_info() ((void) 0)
@@ -104,7 +106,7 @@ void nd_tasklet_main(arm_event_s *event)
              * This event should be delivered ONLY ONCE.
              */
             tasklet_data_ptr->node_main_tasklet_id = event->receiver;
-            nd_tasklet_configure_network();
+            mesh_system_send_connect_event(tasklet_data_ptr->tasklet);
             break;
 
         case ARM_LIB_SYSTEM_TIMER_EVENT:
@@ -114,6 +116,12 @@ void nd_tasklet_main(arm_event_s *event)
             if (event->event_id == TIMER_EVENT_START_BOOTSTRAP) {
                 tr_debug("Restart bootstrap");
                 arm_nwk_interface_up(tasklet_data_ptr->network_interface_id);
+            }
+            break;
+
+        case APPLICATION_EVENT:
+            if (event->event_id == APPL_EVENT_CONNECT) {
+                nd_tasklet_configure_and_connect_to_network();
             }
             break;
 
@@ -184,10 +192,10 @@ void nd_tasklet_parse_network_event(arm_event_s *event)
 }
 
 /*
- * \brief Configure mesh network
+ * \brief Configure and establish network connection
  *
  */
-void nd_tasklet_configure_network(void)
+void nd_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
@@ -306,8 +314,8 @@ int8_t nd_tasklet_get_router_ip_address(char *address, int8_t len)
 
 int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
 {
-    int8_t status = 0;
     int8_t re_connecting = true;
+    int8_t tasklet_id = tasklet_data_ptr->tasklet;
 
     if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID) {
         return -3;  // already connected to network
@@ -329,31 +337,33 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     //tasklet_data_ptr->psk_sec_info.key_id = 0;
 
     if (re_connecting == false) {
-        int8_t status = eventOS_event_handler_create(&nd_tasklet_main,
-                        ARM_LIB_TASKLET_INIT_EVENT);
-        if (status < 0) {
+        tasklet_data_ptr->tasklet = eventOS_event_handler_create(&nd_tasklet_main,
+                ARM_LIB_TASKLET_INIT_EVENT);
+        if (tasklet_data_ptr->tasklet < 0) {
             // -1 handler already used by other tasklet
             // -2 memory allocation failure
-            return status;
+            return tasklet_data_ptr->tasklet;
         }
     } else {
-        nd_tasklet_configure_network();
+        tasklet_data_ptr->tasklet = tasklet_id;
+        mesh_system_send_connect_event(tasklet_data_ptr->tasklet);
     }
 
-    return status;
+    return tasklet_data_ptr->tasklet;
 }
 
-int8_t nd_tasklet_disconnect(void)
+int8_t nd_tasklet_disconnect(bool send_cb)
 {
     int8_t status = -1;
-    // check that init has been called
     if (tasklet_data_ptr != NULL) {
         if (tasklet_data_ptr->network_interface_id != INVALID_INTERFACE_ID) {
             status = arm_nwk_interface_down(tasklet_data_ptr->network_interface_id);
             tasklet_data_ptr->network_interface_id = INVALID_INTERFACE_ID;
+            if (send_cb == true) {
+                nd_tasklet_network_state_changed(MESH_DISCONNECTED);
+            }
         }
-        // in any case inform client that we are in disconnected state
-        nd_tasklet_network_state_changed(MESH_DISCONNECTED);
+        tasklet_data_ptr->mesh_api_cb = NULL;
     }
     return status;
 }

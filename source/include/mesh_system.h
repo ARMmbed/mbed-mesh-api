@@ -23,10 +23,23 @@ extern "C" {
 #endif
 
 /*
+ * Event type for connecting
+ */
+#define APPL_EVENT_CONNECT 0x01
+
+/*
+ * \brief Send application connect event to receiver tasklet to
+ * ensure that connection is made in right tasklet.
+ */
+void mesh_system_send_connect_event(uint8_t receiver);
+
+/*
  * \brief Initialize mesh system.
  * Memory pool, timers, traces and support are initialized.
  */
 void mesh_system_init(void);
+
+
 
 #ifdef __cplusplus
 }

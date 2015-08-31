@@ -61,36 +61,22 @@ void test_callback_connect_disconnect(mesh_connection_status_t mesh_state)
     }
 }
 
-void test_mesh_api_connect_disconnect_loop(int8_t rf_device_id, uint8_t loop_count)
+void test_mesh_api_connect_disconnect(int8_t rf_device_id, mesh_network_type_t type)
 {
     mesh_error_t err;
-    mesh_api = MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
-    err = mesh_api->init(rf_device_id, test_callback_connect_disconnect);
+    TEST_PRINT("\r\nBegin %s, type=%d\r\n", __func__, type);
 
-    if (!TEST_EQ(err, MESH_ERROR_NONE)) {
-        test_result_notify(test_pass_global, mesh_api);
-        return;
+    mesh_api = MeshInterfaceFactory::createInterface(type);
+    // initialize interface
+    if (type == MESH_TYPE_THREAD) {
+        uint8_t eui64[8];
+        char *pskd;
+        rf_read_mac_address(eui64);
+        pskd = (char *)"Secret password";
+        err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_connect_disconnect, eui64, pskd);
+    } else {
+        err = mesh_api->init(rf_device_id, test_callback_connect_disconnect);
     }
-
-    for (int i = 0; i < loop_count; i++) {
-        err = mesh_api->connect();
-        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
-            test_result_notify(test_pass_global, mesh_api);
-            break;
-        }
-        // control goes to test callback
-    }
-}
-
-void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t loop_count)
-{
-    mesh_error_t err;
-    mesh_api = (MeshThread *)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
-    uint8_t eui64[8];
-    char *pskd;
-    rf_read_mac_address(eui64);
-    pskd = (char *)"Secret password";
-    err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_connect_disconnect, eui64, pskd);
 
     if (!TEST_EQ(err, MESH_ERROR_NONE)) {
         TEST_RESULT_PRINT();
@@ -98,15 +84,13 @@ void test_mesh_api_connect_disconnect_loop_thread(int8_t rf_device_id, uint8_t l
         return;
     }
 
-    for (int i = 0; i < loop_count; i++) {
-        err = mesh_api->connect();
-        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
-            TEST_RESULT_PRINT();
-            test_result_notify(test_pass_global, mesh_api);
-            break;
-        }
-        // control goes to test callback
+    err = mesh_api->connect();
+    if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
+        return;
     }
+    // control goes to test callback
 }
 
 void test_callback_init(mesh_connection_status_t mesh_state)
@@ -117,6 +101,7 @@ void test_callback_init(mesh_connection_status_t mesh_state)
 void test_mesh_api_init(int8_t rf_device_id)
 {
     mesh_error_t err;
+    TEST_PRINT("\r\nBegin %s\r\n", __func__);
     mesh_api = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
 
     do {
@@ -155,6 +140,8 @@ void test_mesh_api_init_thread(int8_t rf_device_id)
     mesh_error_t err;
     uint8_t eui64[8];
     char *pskd;
+
+    TEST_PRINT("\r\nBegin %s\r\n", __func__);
     rf_read_mac_address(eui64);
     pskd = (char *)"Secret password";
 
@@ -239,18 +226,20 @@ void test_callback_connect(mesh_connection_status_t mesh_state)
         TEST_RESULT_PRINT();
         test_result_notify(test_pass_global, mesh_api);
     } else {
-        // untested branch, catch erros by bad state checking...
-        TEST_EQ(mesh_network_state, MESH_CONNECTED);
+        // untested branch, catch errors by bad state checking...
+        TEST_EQ(true, false);
         tr_error("Networking error!");
         TEST_RESULT_PRINT();
         test_result_notify(test_pass_global, mesh_api);
     }
 }
 
-void test_mesh_api_connect(int8_t rf_device_id)
+void test_mesh_api_connect(int8_t rf_device_id, mesh_network_type_t type)
 {
     mesh_error_t err;
-    mesh_api = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
+
+    TEST_PRINT("\r\nBegin %s, type=%d\r\n", __func__, type);
+    mesh_api = MeshInterfaceFactory::createInterface(type);
 
     do {
         // connect uninitialized
@@ -261,7 +250,16 @@ void test_mesh_api_connect(int8_t rf_device_id)
             break;
         }
 
-        err = mesh_api->init(rf_device_id, test_callback_connect);
+        // initialize interface
+        if (type == MESH_TYPE_THREAD) {
+            uint8_t eui64[8];
+            char *pskd;
+            rf_read_mac_address(eui64);
+            pskd = (char *)"Secret password";
+            err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_connect, eui64, pskd);
+        } else {
+            err = mesh_api->init(rf_device_id, test_callback_connect);
+        }
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
@@ -269,14 +267,13 @@ void test_mesh_api_connect(int8_t rf_device_id)
         }
 
         // successful connect
-        mesh_network_state = MESH_DISCONNECTED;
         err = mesh_api->connect();
         if (!TEST_EQ(err, MESH_ERROR_NONE)) {
             TEST_RESULT_PRINT();
             test_result_notify(test_pass_global, mesh_api);
             break;
         }
-
+        //test continues in callback
         break;
     } while (1);
 }
@@ -296,6 +293,8 @@ void test_callback_disconnect(mesh_connection_status_t mesh_state)
 void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type)
 {
     mesh_error_t err;
+
+    TEST_PRINT("\r\nBegin %s\r\n", __func__);
     mesh_api = MeshInterfaceFactory::createInterface(type);
 
     do {
@@ -329,4 +328,59 @@ void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type)
 
     TEST_RESULT_PRINT();
     test_result_notify(test_pass_global, mesh_api);
+}
+
+/*
+ * Callback from mesh network for test_mesh_api_delete_connected test
+ */
+void test_callback_delete_connected(mesh_connection_status_t mesh_state)
+{
+    tr_info("test_callback_delete() %d", mesh_state);
+    if (mesh_state == MESH_CONNECTED) {
+        delete mesh_api;
+        mesh_api = NULL;
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
+    } else {
+        tr_error("Networking error!");
+        TEST_EQ(true, false);
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
+    }
+}
+
+void test_mesh_api_delete_connected(int8_t rf_device_id, mesh_network_type_t type)
+{
+    mesh_error_t err;
+
+    TEST_PRINT("\r\nBegin %s, type=%d\r\n", __func__, type);
+    mesh_api = MeshInterfaceFactory::createInterface(type);
+
+    do {
+        // initialize interface
+        if (type == MESH_TYPE_THREAD) {
+            uint8_t eui64[8];
+            char *pskd;
+            rf_read_mac_address(eui64);
+            pskd = (char *)"Secret password";
+            err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_delete_connected, eui64, pskd);
+        } else {
+            err = mesh_api->init(rf_device_id, test_callback_delete_connected);
+        }
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+
+        // successful connect
+        err = mesh_api->connect();
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+        //test continues in callback
+        break;
+    } while (1);
 }

@@ -15,11 +15,13 @@
  */
 
 #include "eventOS_scheduler.h"
+#include "eventOS_event.h"
 #include "net_interface.h"
 #include "nsdynmemLIB.h"
 #include "randLIB.h"
 #include "platform/arm_hal_timer.h"
 #include "sal-iface-6lowpan/ns_sal.h"
+#include "include/mesh_system.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
@@ -65,4 +67,15 @@ void mesh_system_init(void)
         ns_sal_init_stack();
         mesh_initialized = true;
     }
+}
+
+void mesh_system_send_connect_event(uint8_t receiver)
+{
+    arm_event_s event;
+    event.event_id = APPL_EVENT_CONNECT;
+    event.receiver = receiver;
+    event.event_type = APPLICATION_EVENT;
+    event.data_ptr = NULL;
+    event.priority = ARM_LIB_LOW_PRIORITY_EVENT;
+    eventOS_event_send(&event);
 }
