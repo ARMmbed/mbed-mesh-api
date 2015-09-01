@@ -252,16 +252,12 @@ void nd_tasklet_trace_bootstrap_info()
                                 &app_nd_address_info) != 0) {
         tr_error("ND Address read fail");
     } else {
-        tr_debug("ND Access Point:");
-        printf_ipv6_address(app_nd_address_info.border_router);
-
-        tr_debug("ND Prefix 64:");
-        printf_array(app_nd_address_info.prefix, 8);
+        tr_debug("ND Access Point: %s", trace_ipv6(app_nd_address_info.border_router));
+        tr_debug("ND Prefix 64: %s", trace_array(app_nd_address_info.prefix, 8));
 
         if (arm_net_address_get(tasklet_data_ptr->network_interface_id,
                                 ADDR_IPV6_GP, temp_ipv6) == 0) {
-            tr_debug("GP IPv6:");
-            printf_ipv6_address(temp_ipv6);
+            tr_debug("GP IPv6: %s", trace_ipv6(temp_ipv6));
         }
     }
 
@@ -270,16 +266,15 @@ void nd_tasklet_trace_bootstrap_info()
         tr_error("MAC Address read fail\n");
     } else {
         uint8_t temp[2];
-        tr_debug("MAC 16-bit:");
+        common_write_16_bit(app_link_address_info.mac_short,temp);
+        tr_debug("MAC 16-bit: %s", trace_array(temp, 2));
         common_write_16_bit(app_link_address_info.PANId, temp);
-        tr_debug("PAN ID:");
-        printf_array(temp, 2);
-        tr_debug("MAC 64-bit:");
-        printf_array(app_link_address_info.mac_long, 8);
-        tr_debug("IID (Based on MAC 64-bit address):");
-        printf_array(app_link_address_info.iid_eui64, 8);
+        tr_debug("PAN ID: %s", trace_array(temp, 2));
+        tr_debug("MAC 64-bit: %s", trace_array(app_link_address_info.mac_long, 8));
+        tr_debug("IID (Based on MAC 64-bit address): %s", trace_array(app_link_address_info.iid_eui64, 8));
     }
-    tr_debug("traced bootstrap info");
+
+    tr_debug("Channel: %d", arm_net_get_current_channel(tasklet_data_ptr->network_interface_id));
 }
 #endif /* #define TRACE_ND_TASKLET */
 
