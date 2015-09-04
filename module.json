@@ -14,7 +14,6 @@
   },
   "homepage": "https://github.com/ARMmbed/mbed-mesh-api",
   "license": "Apache-2.0",
-  "private": true,
   "dependencies": {
     "sal-iface-6lowpan": "~0.2.0"
   },
