@@ -2,7 +2,7 @@
 The ARM mbed mesh API allows the client to use the IPv6 mesh network.
 
 The client can use the `Mesh6LoWPAN_ND` or `MeshThread`object for connecting to the 
-mesh network and when once successfully connected, the client can create a socket by 
+mesh network and when successfully connected, the client can create a socket by 
 using the [mbed C++ socket API](https://github.com/ARMmbed/sockets) to start 
 communication with a remote peer. When the connection is no longer needed the client 
 can close the connection with the `disconnect` method.
@@ -25,9 +25,9 @@ use the following modules when they are available:
 This module is under construction and therefore, there are some limitations as follows:
 
 * A node is statically configured to router mode.
-* In 6LoWPAN-ND mode beacon scan takes place on channel 12 (2.4Ghz). You can change 
+* In 6LoWPAN-ND mode, the beacon scan takes place on channel 12 (2.4Ghz). You can change 
  this by setting `DEFAULT_SCAN_CHANNEL` to some other channel in `./source/include/static_config.h`.
-* In Thread bootstrap mode RF channel is set to channel 12 (2.4GHz). You can change
+* In Thread bootstrap mode, the RF channel is set to channel 12 (2.4GHz). You can change
  this by updating `THREAD_RF_CHANNEL` in `./source/include/static_config.h`
 
 ### Network connection states
@@ -41,11 +41,11 @@ client is allowed to attempt connecting again.
 
 ## Getting started
 This module contains an example application in the `./test/6lowpan_nd/main.cpp` folder. 
-To build and run the example, see the [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
+To build and run the example, read the [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
 
 ## Usage example for 6LoWPAN ND mode
 
-Create a callback function to catch the network status:
+Create a callback function to get the network status:
 ```
 void mesh_api_callback(mesh_connection_status_t mesh_status)
 {
@@ -77,7 +77,7 @@ if (network_state == MESH_CONNECTED) {
 ```
 ## Usage example for 6LoWPAN Thread mode
 
-Create a callback function to catch the network status:
+Create a callback function to get the network status:
 ```
 void mesh_api_callback(mesh_connection_status_t mesh_status)
 {
@@ -100,7 +100,7 @@ Connect to the mesh network:
 ```C++
 meshApi->connect();
 ```
-Wait for the callback to be called and once successfully connected to the mesh network, create a socket and 
+Wait for the callback to be called and when successfully connected to the mesh network, create a socket and 
 start communication with the remote end:
 ```
 if (network_state == MESH_CONNECTED) {
