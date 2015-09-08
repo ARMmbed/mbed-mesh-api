@@ -31,12 +31,12 @@
 
 Mesh6LoWPAN_ND::Mesh6LoWPAN_ND() : AbstractMesh(MESH_TYPE_6LOWPAN_ND)
 {
-
 }
 
 Mesh6LoWPAN_ND::~Mesh6LoWPAN_ND()
 {
     tr_debug("~Mesh6LoWPAN()");
+    nd_tasklet_disconnect(false);
 }
 
 bool Mesh6LoWPAN_ND::getOwnIpAddress(char *address, int8_t len)

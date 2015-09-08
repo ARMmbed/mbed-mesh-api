@@ -27,13 +27,10 @@
 #define TRACE_GROUP  "main"     // for traces
 
 /**
- * NOTE! Reconnecting to mesh network fails after one connect-disconnect sequence,
- * some tests are flagged out due this bug.
- * Thread and ND tests can't be executed at the same time.
+ * Test with 6LoWPAN ND or Thread bootstrap
+ * If TEST_THREAD_BOOTSTRAP is not defined then 6LoWPAN ND bootstrap is used.
  */
-
-//#define TEST_THREAD
-//#define CONNECT_RECONNECT
+//#define TEST_THREAD_BOOTSTRAP
 
 class TestMeshApi;
 TestMeshApi *testMeshApi;
@@ -45,9 +42,10 @@ class TestMeshApi
 private:
     int testId;
     int tests_pass;
+    int loopCount;
 
 public:
-    TestMeshApi() : testId(0), tests_pass(1) {
+    TestMeshApi() : testId(0), tests_pass(1), loopCount(0) {
         tr_info("TestMeshApi");
     }
 
@@ -65,26 +63,27 @@ public:
             case 3:
                 test_mesh_api_disconnect(rf_device_id, MESH_TYPE_THREAD);
                 break;
-
-#ifdef TEST_THREAD
+#ifndef TEST_THREAD_BOOTSTRAP
             case 4:
-                test_mesh_api_connect_disconnect_loop_thread(rf_device_id, 1 /*5*/);
+                test_mesh_api_connect(rf_device_id, MESH_TYPE_6LOWPAN_ND);
                 break;
-#else
-            case 4:
-                test_mesh_api_connect_disconnect_loop(rf_device_id, 1 /*5*/);
-                break;
-#endif
-
-#ifdef CONNECT_RECONNECT
             case 5:
-                // interface connect/disconnect/connect loop is not working properly,
-                // therefore skip tests that require re-connecting
-                test_mesh_api_connect(rf_device_id);
+                test_mesh_api_delete_connected(rf_device_id, MESH_TYPE_6LOWPAN_ND);
                 break;
-#endif
-
-
+            case 6:
+                test_mesh_api_connect_disconnect(rf_device_id, MESH_TYPE_6LOWPAN_ND);
+                break;
+#else // TEST_THREAD_BOOTSTRAP
+            case 4:
+                test_mesh_api_connect_disconnect(rf_device_id, MESH_TYPE_THREAD);
+                break;
+            case 5:
+                test_mesh_api_delete_connected(rf_device_id, MESH_TYPE_THREAD);
+                break;
+            case 6:
+                test_mesh_api_connect(rf_device_id, MESH_TYPE_THREAD);
+                break;
+#endif // TEST_THREAD_BOOTSTRAP
             default:
                 endTest(tests_pass);
                 break;
@@ -98,7 +97,18 @@ public:
     }
 
     void endTest(bool status) {
-        MBED_HOSTTEST_RESULT(status);
+        if (loopCount > 0) {
+            printf("\r\n#####\r\n");
+            printf("\r\nTest loops left %d, current result=%d\r\n", loopCount, tests_pass);
+            printf("\r\n#####\r\n");
+            loopCount--;
+            testId = 0;
+            /* Schedule tests run again */
+            FunctionPointer0<void> fpNextTest(testMeshApi, &TestMeshApi::runTests);
+            minar::Scheduler::postCallback(fpNextTest.bind()).delay(minar::milliseconds(3000));
+        } else {
+            MBED_HOSTTEST_RESULT(status);
+        }
     }
 };
 
@@ -114,7 +124,7 @@ void test_result_notify(int result, AbstractMesh *meshAPI)
 
     /* Schedule next test to run */
     FunctionPointer0<void> fpNextTest(testMeshApi, &TestMeshApi::runTests);
-    minar::Scheduler::postCallback(fpNextTest.bind());
+    minar::Scheduler::postCallback(fpNextTest.bind()).delay(minar::milliseconds(1000));
 }
 
 
@@ -124,6 +134,10 @@ void app_start(int, char **)
     MBED_HOSTTEST_SELECT(default);
     MBED_HOSTTEST_DESCRIPTION(Mesh network API tests);
     MBED_HOSTTEST_START("mbed-mesh-api");
+
+    // set tracing baud rate
+    static Serial pc(USBTX, USBRX);
+    pc.baud(115200);
 
     // before registering RF device mesh network needs to be created
     Mesh6LoWPAN_ND *mesh_api = (Mesh6LoWPAN_ND *)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);

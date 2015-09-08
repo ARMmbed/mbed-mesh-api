@@ -18,7 +18,6 @@
  * Mesh networking interface.
  */
 
-#include "minar/minar.h"
 #include "mbed-mesh-api/AbstractMesh.h"
 #include "mbed-mesh-api/MeshThread.h"
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
@@ -121,9 +120,9 @@ mesh_error_t DISABLE_GCC_OPT AbstractMesh::disconnect()
     int8_t status = -1;
 
     if (_mesh_network_type == MESH_TYPE_THREAD) {
-        status = thread_tasklet_disconnect();
+        status = thread_tasklet_disconnect(true);
     } else if (_mesh_network_type == MESH_TYPE_6LOWPAN_ND) {
-        status = nd_tasklet_disconnect();
+        status = nd_tasklet_disconnect(true);
     }
 
     if (status >= 0) {
@@ -136,6 +135,6 @@ mesh_error_t DISABLE_GCC_OPT AbstractMesh::disconnect()
 void AbstractMesh::callback(mesh_connection_status_t state)
 {
     if (_mesh_network_handler) {
-        minar::Scheduler::postCallback(_mesh_network_handler.bind(state));
+        _mesh_network_handler(state);
     }
 }
