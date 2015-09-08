@@ -53,7 +53,7 @@ void mesh_network_callback(mesh_connection_status_t mesh_state)
 
 void app_start(int, char **)
 {
-    int8_t status;
+    mesh_error_t status;
 
     // set tracing baud rate
     static Serial pc(USBTX, USBRX);
@@ -83,14 +83,14 @@ void app_start(int, char **)
     // Set ns_trace configuration level
     // set_trace_config(TRACE_ACTIVE_LEVEL_INFO|TRACE_MODE_COLOR|TRACE_CARRIAGE_RETURN);
 
-    if (status < 0) {
+    if (status != MESH_ERROR_NONE) {
         tr_error("Can't initialize mesh network");
         return;
     }
 
     // connect interface to the network
     status = meshApi->connect();
-    if (status != 0) {
+    if (status != MESH_ERROR_NONE) {
         tr_error("Can't connect to Mesh network!");
         return;
     }
