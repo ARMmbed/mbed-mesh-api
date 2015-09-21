@@ -21,7 +21,7 @@
 #include "mbed.h"
 #include "mbed-util/FunctionPointer.h"
 
-using mbed::util::FunctionPointer1;
+using namespace mbed::util;
 
 /**
  * \brief Abstract Mesh networking interface.
