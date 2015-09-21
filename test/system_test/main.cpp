@@ -21,10 +21,13 @@
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "test_cases.h"
 #include "mbed/test_env.h"
+#include "mbed-util/FunctionPointer.h"
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
 
 #define TRACE_GROUP  "main"     // for traces
+
+using namespace mbed::util;
 
 /**
  * Test with 6LoWPAN ND or Thread bootstrap
