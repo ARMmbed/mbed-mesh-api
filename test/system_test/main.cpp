@@ -21,7 +21,7 @@
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "test_cases.h"
 #include "mbed/test_env.h"
-#include "mbed-util/FunctionPointer.h"
+#include "core-util/FunctionPointer.h"
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
 
