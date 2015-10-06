@@ -1,6 +1,6 @@
 {
   "name": "mbed-mesh-api",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Mesh networking interface",
   "keywords": [
     "Mesh",
