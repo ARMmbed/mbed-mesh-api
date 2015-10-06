@@ -237,7 +237,6 @@ void thread_tasklet_configure_and_connect_to_network(void)
 
     thread_managenet_node_init(thread_tasklet_data_ptr->nwk_if_id,
                                thread_tasklet_data_ptr->channel_list,
-                               NULL /*link_filter_ptr */,
                                &device_configuration,
                                &thread_tasklet_data_ptr->link_config);
 

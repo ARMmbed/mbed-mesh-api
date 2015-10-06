@@ -19,7 +19,7 @@
 
 #include "AbstractNetworkInterface.h"
 #include "mbed.h"
-#include "mbed-util/FunctionPointer.h"
+#include "core-util/FunctionPointer.h"
 
 using namespace mbed::util;
 
