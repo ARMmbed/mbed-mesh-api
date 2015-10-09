@@ -71,11 +71,12 @@ void mesh_system_init(void)
 
 void mesh_system_send_connect_event(uint8_t receiver)
 {
-    arm_event_s event;
-    event.event_id = APPL_EVENT_CONNECT;
-    event.receiver = receiver;
-    event.event_type = APPLICATION_EVENT;
-    event.data_ptr = NULL;
-    event.priority = ARM_LIB_LOW_PRIORITY_EVENT;
+    arm_event_s event = {
+        .sender =  receiver,
+        .event_id = APPL_EVENT_CONNECT,
+        .receiver = receiver,
+        .event_type = APPLICATION_EVENT,
+        .priority = ARM_LIB_LOW_PRIORITY_EVENT,
+    };
     eventOS_event_send(&event);
 }

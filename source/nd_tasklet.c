@@ -87,11 +87,6 @@ void nd_tasklet_main(arm_event_s *event)
     arm_library_event_type_e event_type;
     event_type = (arm_library_event_type_e) event->event_type;
 
-    if (event->sender != 0) {
-        // only handling stack events
-        return;
-    }
-
     switch (event_type) {
         case ARM_LIB_NWK_INTERFACE_EVENT:
             /* This event is delivered every and each time when there is new
