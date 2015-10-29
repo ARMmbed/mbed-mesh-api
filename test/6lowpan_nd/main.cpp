@@ -15,7 +15,7 @@
  */
 
 #include <stdio.h>
-#include "test_env.h"
+#include "mbed-drivers/test_env.h"
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "mbed-mesh-api/MeshInterfaceFactory.h"
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"

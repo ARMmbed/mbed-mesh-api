@@ -18,7 +18,7 @@
 #define __ABSTRACTMESH_H__
 
 #include "AbstractNetworkInterface.h"
-#include "mbed.h"
+#include "mbed-drivers/mbed.h"
 #include "core-util/FunctionPointer.h"
 
 using namespace mbed::util;

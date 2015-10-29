@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "mbed.h"
+#include "mbed-drivers/mbed.h"
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
 #include "mbed-mesh-api/MeshThread.h"
 #include "mbed-mesh-api/MeshInterfaceFactory.h"
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "test_cases.h"
-#include "mbed/test_env.h"
+#include "mbed-drivers/test_env.h"
 #include "core-util/FunctionPointer.h"
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
