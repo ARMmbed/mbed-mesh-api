@@ -51,7 +51,7 @@ typedef enum {
  */
 typedef struct {
     void (*mesh_api_cb)(mesh_connection_status_t nwk_status);
-    uint32_t channel_list;
+    channel_list_s channel_list;
     tasklet_state_t tasklet_state;
     int8_t tasklet;
 
@@ -202,6 +202,9 @@ void thread_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
+    thread_tasklet_data_ptr->channel_list.channel_page = FHSS_CHANNEL_PAGE;
+    thread_tasklet_data_ptr->channel_list.channel_mask[0] = SCAN_CHANNEL_LIST;
+
     thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_ROUTER;
 
     arm_nwk_interface_configure_6lowpan_bootstrap_set(
@@ -216,7 +219,6 @@ void thread_tasklet_configure_and_connect_to_network(void)
     memcpy(thread_tasklet_data_ptr->link_config.name, "Arm Powered Core", 16);
     thread_tasklet_data_ptr->link_config.panId =  THREAD_PANID;
     thread_tasklet_data_ptr->link_config.rfChannel = THREAD_RF_CHANNEL;
-    thread_tasklet_data_ptr->channel_list = SCAN_CHANNEL_LIST;
 
     //Beacon data setting
     thread_tasklet_data_ptr->link_config.Protocol_id = 0x03;
@@ -231,7 +233,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
     thread_tasklet_data_ptr->link_config.key_sequence = 0;
 
     thread_managenet_node_init(thread_tasklet_data_ptr->nwk_if_id,
-                               thread_tasklet_data_ptr->channel_list,
+                               &thread_tasklet_data_ptr->channel_list,
                                &device_configuration,
                                &thread_tasklet_data_ptr->link_config);
 

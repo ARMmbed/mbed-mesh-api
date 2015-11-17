@@ -51,7 +51,7 @@ typedef enum {
  */
 typedef struct {
     void (*mesh_api_cb)(mesh_connection_status_t nwk_status);
-    uint32_t channel_list;
+    channel_list_s channel_list;
     tasklet_state_t tasklet_state;
     net_6lowpan_mode_e mode;
     net_6lowpan_link_layer_sec_mode_e sec_mode;
@@ -194,6 +194,9 @@ void nd_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
+    tasklet_data_ptr->channel_list.channel_page = FHSS_CHANNEL_PAGE;
+    tasklet_data_ptr->channel_list.channel_mask[0] = SCAN_CHANNEL_LIST;
+
     // configure bootstrap
     arm_nwk_interface_configure_6lowpan_bootstrap_set(
         tasklet_data_ptr->network_interface_id, tasklet_data_ptr->mode,
@@ -202,12 +205,14 @@ void nd_tasklet_configure_and_connect_to_network(void)
     // configure link layer security
     arm_nwk_link_layer_security_mode(
         tasklet_data_ptr->network_interface_id,
-        tasklet_data_ptr->sec_mode, tasklet_data_ptr->psk_sec_info.key_id, &tasklet_data_ptr->psk_sec_info);
+        tasklet_data_ptr->sec_mode, tasklet_data_ptr->psk_sec_info.key_id,
+        &tasklet_data_ptr->psk_sec_info);
 
     // configure scan parameters
-    arm_nwk_6lowpan_link_scan_paramameter_set(
-        tasklet_data_ptr->network_interface_id,
-        tasklet_data_ptr->channel_list, 5);
+    arm_nwk_6lowpan_link_scan_parameter_set(tasklet_data_ptr->network_interface_id, 5);
+
+    // configure scan channels
+    arm_nwk_set_channel_list(tasklet_data_ptr->network_interface_id, &tasklet_data_ptr->channel_list);
 
     // Configure scan options (NULL disables filter)
     arm_nwk_6lowpan_link_nwk_id_filter_for_nwk_scan(
@@ -321,7 +326,6 @@ int8_t nd_tasklet_connect(mesh_interface_cb callback, int8_t nwk_interface_id)
     tasklet_data_ptr->tasklet_state = TASKLET_STATE_INITIALIZED;
 
     //TODO: Fetch these values from device config api
-    tasklet_data_ptr->channel_list = SCAN_CHANNEL_LIST;
     tasklet_data_ptr->mode = NET_6LOWPAN_ROUTER;
     tasklet_data_ptr->sec_mode = NET_SEC_MODE_NO_LINK_SECURITY;
     //tasklet_data_ptr->psk_sec_info.key_id = 0;
