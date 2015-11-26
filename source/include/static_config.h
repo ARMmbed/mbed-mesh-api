@@ -32,9 +32,9 @@ extern "C" {
 #define CHANNEL_12      1<<12
 #define ALL_CHANNELS    0x07fff800
 
-#ifdef  YOTTA_CFG_MBED_OS_NANOSTACK_SCAN_CHANNEL_LIST
+#ifdef  YOTTA_CFG_MBED_MESH_API_SCAN_CHANNEL_LIST
 // use mbed OS configuration if it is available
-#define SCAN_CHANNEL_LIST   YOTTA_CFG_MBED_OS_NANOSTACK_SCAN_CHANNEL_LIST
+#define SCAN_CHANNEL_LIST   YOTTA_CFG_MBED_MESH_API_SCAN_CHANNEL_LIST
 #else
 #define SCAN_CHANNEL_LIST   CHANNEL_12
 #endif
@@ -45,9 +45,9 @@ extern "C" {
  * -for scan channels 11-26 use value 0 = CHANNEL_PAGE_0
  * Possible channels are 0,1,2,3,4,5,6,9,10, see arm_hal_phy.h for details
  */
-#ifdef YOTTA_CFG_MBED_OS_NANOSTACK_CHANNEL_PAGE
+#ifdef YOTTA_CFG_MBED_MESH_API_CHANNEL_PAGE
 // use mbed OS configuration if it is available
-#define FHSS_CHANNEL_PAGE   YOTTA_CFG_MBED_OS_NANOSTACK_CHANNEL_PAGE
+#define FHSS_CHANNEL_PAGE   YOTTA_CFG_MBED_MESH_API_CHANNEL_PAGE
 #else
 #define FHSS_CHANNEL_PAGE   0
 //#define FHSS_CHANNEL_PAGE   2
@@ -56,8 +56,8 @@ extern "C" {
 /*
  * RF channel in Thread configuration
  */
-#ifdef YOTTA_CFG_MBED_OS_NANOSTACK_THREAD_CHANNEL
-#define THREAD_RF_CHANNEL   YOTTA_CFG_MBED_OS_NANOSTACK_THREAD_CHANNEL
+#ifdef YOTTA_CFG_MBED_MESH_API_THREAD_CHANNEL
+#define THREAD_RF_CHANNEL   YOTTA_CFG_MBED_MESH_API_THREAD_CHANNEL
 #else
 #define THREAD_RF_CHANNEL   12
 #endif
