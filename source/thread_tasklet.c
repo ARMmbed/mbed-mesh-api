@@ -357,8 +357,10 @@ int8_t thread_tasklet_network_init(int8_t device_id)
 
 void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd)
 {
+    tr_debug("pskd is %s, pskd_len is %d", pskd, strlen(pskd));
     device_configuration.PSKd_ptr = ns_dyn_mem_alloc(strlen(pskd) + 1);
-    strcpy(device_configuration.PSKd_ptr, pskd);
+    device_configuration.PSKd_len = strlen(pskd);
+    memcpy(device_configuration.PSKd_ptr, pskd, strlen(pskd));
     memcpy(device_configuration.eui64, eui64, 8);
 }
 
