@@ -139,7 +139,7 @@ void app_start(int, char **)
     MBED_HOSTTEST_START("mbed-mesh-api");
 
     // set tracing baud rate
-    static Serial pc(USBTX, USBRX);
+    static Serial &pc = get_stdio_serial();
     pc.baud(115200);
 
     // before registering RF device mesh network needs to be created
