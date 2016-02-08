@@ -56,7 +56,7 @@ void app_start(int, char **)
     mesh_error_t status;
 
     // set tracing baud rate
-    static Serial pc(USBTX, USBRX);
+    static Serial &pc = get_stdio_serial();
     pc.baud(115200);
 
     // create 6LoWPAN_ND interface
