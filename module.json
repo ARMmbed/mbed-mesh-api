@@ -15,10 +15,10 @@
   "homepage": "https://github.com/ARMmbed/mbed-mesh-api",
   "license": "Apache-2.0",
   "dependencies": {
-    "sal-iface-6lowpan": "^1.0.0"
+    "sal-iface-6lowpan": "^2.0.0"
   },
   "testDependencies": {
-    "atmel-rf-driver": "^1.0.0"
+    "atmel-rf-driver": "^2.0.0"
   },
   "targetDependencies": {}
 }

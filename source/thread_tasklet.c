@@ -218,6 +218,8 @@ void thread_tasklet_configure_and_connect_to_network(void)
     memcpy(thread_tasklet_data_ptr->link_config.name, "Arm Powered Core", 16);
     thread_tasklet_data_ptr->link_config.panId =  THREAD_PANID;
     thread_tasklet_data_ptr->link_config.rfChannel = THREAD_RF_CHANNEL;
+    thread_tasklet_data_ptr->channel_list.channel_page = FHSS_CHANNEL_PAGE;
+    thread_tasklet_data_ptr->channel_list.channel_mask[0] = SCAN_CHANNEL_LIST;
 
     //Beacon data setting
     thread_tasklet_data_ptr->link_config.Protocol_id = 0x03;
