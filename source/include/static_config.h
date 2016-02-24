@@ -27,47 +27,70 @@ extern "C" {
  * f.e.:
  * channel 4 = 1<<4.
  * channel 10 = 1<<10
- * There are 26 channels from 1 to 26. 1 to 10 in sub-GHz and 11 to 26 in 2.4 GHz band
- */
-
-#ifdef YOTTA_CFG_MBED_MESH_API_SELECTED_RF_CHANNEL
-#define USE_CHANNEL 1<<YOTTA_CFG_MBED_MESH_API_SELECTED_RF_CHANNEL
-#else
-#define USE_CHANNEL       1<<12
-#define ALL_CHANNELS    0x07fff800
-#endif
-
-#ifdef  YOTTA_CFG_MBED_MESH_API_SCAN_CHANNEL_LIST
-// use mbed OS configuration if it is available
-#define SCAN_CHANNEL_LIST   YOTTA_CFG_MBED_MESH_API_SCAN_CHANNEL_LIST
-#else
-#define SCAN_CHANNEL_LIST   USE_CHANNEL
-#endif
-
-/*
+ *
  * Channel page.
  * -for scan channels 0-10 use value 2 = CHANNEL_PAGE_2
  * -for scan channels 11-26 use value 0 = CHANNEL_PAGE_0
  * Possible channels are 0,1,2,3,4,5,6,9,10, see arm_hal_phy.h for details
  */
-#ifdef YOTTA_CFG_MBED_MESH_API_CHANNEL_PAGE
-// use mbed OS configuration if it is available
-#define FHSS_CHANNEL_PAGE   YOTTA_CFG_MBED_MESH_API_CHANNEL_PAGE
+
+#ifndef YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK
+#ifdef YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL
+#define YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK (1<<YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL)
 #else
-#define FHSS_CHANNEL_PAGE   0
-//#define FHSS_CHANNEL_PAGE   2
+#define YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK (1<<12)
+#endif
 #endif
 
-/*
- * RF channel in Thread configuration
- */
-#ifdef YOTTA_CFG_MBED_MESH_API_THREAD_CHANNEL
-#define THREAD_RF_CHANNEL   YOTTA_CFG_MBED_MESH_API_THREAD_CHANNEL
-#else
-#define THREAD_RF_CHANNEL   12
+#ifndef YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE
+#define YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE 0
 #endif
 
-#define THREAD_PANID        0xFACE
+/* Thread configuration */
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_PSKD
+// PSKd, must be longer than 6
+#define YOTTA_CFG_MBED_MESH_API_THREAD_PSKD "Secret password"
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE
+// Operating mode, values: Router, SED
+#define YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE "Router"
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_POLLRATE
+// Sleepy end device pollrate in ms
+#define YOTTA_CFG_MBED_MESH_API_THREAD_POLLRATE 300
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_MASK
+// channel mask, enable all channels
+#define YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_MASK 0x07fff800
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_PAGE
+#define YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_PAGE 0
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL
+#define YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL 12
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PANID
+// Default PANID, 0xDEFA=57082
+#define YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PANID 0xDEFA
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_MASTER_KEY
+#define YOTTA_CFG_MBED_MESH_API_THREAD_MASTER_KEY {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_ML_PREFIX
+#define YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_ML_PREFIX {0xfd, 0x00, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00}
+#endif
+
+#ifndef YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PSKC
+#define YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PSKC {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}
+#endif
 
 #ifdef __cplusplus
 }

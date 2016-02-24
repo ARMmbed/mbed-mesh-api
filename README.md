@@ -15,20 +15,64 @@ The mbed mesh API cooperates with module [mbed mesh socket](https://github.com/A
 The module lists the known mesh socket limitations. Full documentation of the IPv6/6LoWPAN 
 stack can be found in [IPv6/6LoWPAN stack](https://github.com/ARMmbed/sal-stack-nanostack).
 
+### Module Configuration
+
+This module supports static configuration via [yotta configuration](#http://yottadocs.mbed.com/reference/config.html) by using file `config.json`. Application should create the configuration file if it wants to use other than default settings. An example of the configuration file is as follows:
+
+```
+  "mbed-mesh-api": {
+    "thread": {
+      "pskd": "\"Secret password\"",
+      "device_type": "\"Router\"",
+      "pollrate": 300,
+      "config": {
+        "channel_mask": "0x07fff800",
+        "channel_page": 0,
+        "channel": 12,
+        "panid": "0xDEFA",
+        "master_key": "{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}",
+        "ml_prefix": "{0xfd, 0x00, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00}",    
+        "pskc": "{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}"
+      }
+    },
+    "6lowpan_nd": {
+      "channel_mask": "0x1000",
+      "channel_page": 0,
+      "channel": 12
+    }
+  }
+```
+
+Configurable parameters in section: mbed-mesh-api/thread
+
+| Parameter name  | Value         | Description |
+| --------------- | ------------- | ----------- |
+| pskd            | string [6-255 chars] | Human-scaled commissioning credentials |
+| device_type     | string ["SED", "Router"] | Set device operating mode to Sleepy End Device (SED) or router (Router) |
+| pollrate        | number | **Sleepy End Device** data polling rate in milliseconds |
+| channel_mask    | number [0-0x07fff800] | Channel mask, 0x07fff800 scan all channels |
+| channel_page    | number [0, 2]| Channel page, 0 for 2,4 GHz and 2 for sub-GHz radios |
+| channel         | number [0-27] | RF channel to use |
+| panid           | number [0-0xFFFF] | Network identifier |
+| master_key      | byte array [16]| Network master key|
+| ml_prefix       | byte array [8] | Mesh local prefix |
+| pskc            | byte array [16] | Pre-Shared Key for the Commissioner |
+
+Configurable parameters in section: mbed-mesh-api/6lowpan_nd
+
+| Parameter name  | Type     | Description |
+| --------------- | ---------| ----------- |
+| channel_mask    | number [0-0x07fff800] | Channel mask, bit-mask of channels to use |
+| channel_page    | number [0, 2] | 0 for 2,4 GHz and 2 for sub-GHz radios |
+| channel         | number [0-27] | RF channel to use when `channel_mask` is not defined |
+
+
 ## Usage notes
 This module should not be used directly by the applications. The applications should 
 use the following modules when they are available:
 
 * `connection manager`for handling network connections.
 * `device config API` for configuring the network.
-
-This module is under construction and therefore, there are some limitations as follows:
-
-* A node is statically configured to router mode.
-* In 6LoWPAN-ND mode, the beacon scan takes place on channel 12 (2.4Ghz). You can change 
- this by setting `DEFAULT_SCAN_CHANNEL` to some other channel in `./source/include/static_config.h`.
-* In Thread bootstrap mode, the RF channel is set to channel 12 (2.4GHz). You can change
- this by updating `THREAD_RF_CHANNEL` in `./source/include/static_config.h`
 
 ### Network connection states
 After the initialization, the network state is `MESH_DISCONNECTED`. After a successful connection, 
@@ -75,6 +119,11 @@ if (network_state == MESH_CONNECTED) {
 }
 
 ```
+When the network is no longer needed you can disconnect from the network:
+```C++
+meshApi->disconnect();
+```
+
 ## Usage example for 6LoWPAN Thread mode
 
 Create a callback function to get the network status:
@@ -93,8 +142,7 @@ Initialize the object with a registered RF device ID, callback, RF device MAC ad
 uint8_t eui64[8];
 int8_t rf_device = rf_device_register();
 rf_read_mac_address(eui64);
-char *pskd = (char*)"Secret password";
-status = meshApi->init(rf_device, mesh_network_callback, eui64, pskd);
+status = meshApi->init(rf_device, mesh_network_callback, eui64);
 ```
 Connect to the mesh network:
 ```C++
@@ -110,6 +158,10 @@ if (network_state == MESH_CONNECTED) {
 	s.send_to(data, dlen, addr, port);
 }
 
+```
+When the network is no longer needed you can disconnect from the network:
+```C++
+meshApi->disconnect();
 ```
 
 ## Testing

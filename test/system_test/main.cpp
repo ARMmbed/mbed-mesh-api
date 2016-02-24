@@ -33,7 +33,7 @@ using namespace mbed::util;
  * Test with 6LoWPAN ND or Thread bootstrap
  * If TEST_THREAD_BOOTSTRAP is not defined then 6LoWPAN ND bootstrap is used.
  */
-//#define TEST_THREAD_BOOTSTRAP
+#define TEST_THREAD_BOOTSTRAP
 
 class TestMeshApi;
 TestMeshApi *testMeshApi;

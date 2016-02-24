@@ -35,7 +35,7 @@ public:
      * \param registered device is physical device registered
      * \param callbackHandler is callback that is called when network state changes
      * \param eui64 pointer to MAC address (8 bytes) of the registered RF driver
-     * \param pskd private shared key
+     * \param pskd Not used
      * \return MESH_ERROR_NONE on success.
      * \return MESH_ERROR_PARAM when input parameters are illegal (also in case when RF device is already associated to other interface)
      * \return MESH_ERROR_MEMORY in case of memory error

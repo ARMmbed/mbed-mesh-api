@@ -160,12 +160,6 @@ void test_mesh_api_init_thread(int8_t rf_device_id)
             break;
         }
 
-        // no PSK
-        err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_init, eui64, NULL);
-        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
-            break;
-        }
-
         // bad rf-device_id
         err = ((MeshThread *)mesh_api)->init(rf_device_id + 1, test_callback_init, eui64, pskd);
         if (!TEST_EQ(err, MESH_ERROR_MEMORY)) {
