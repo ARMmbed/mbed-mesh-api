@@ -27,16 +27,23 @@ extern "C" {
  * f.e.:
  * channel 4 = 1<<4.
  * channel 10 = 1<<10
+ * There are 26 channels from 1 to 26. 1 to 10 in sub-GHz and 11 to 26 in 2.4 GHz band
  */
-#define CHANNEL_1       1<<1
-#define CHANNEL_12      1<<12
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+#ifdef YOTTA_CFG_MBED_MESH_API_SELECTED_RF_CHANNEL
+#define USE_CHANNEL STR(YOTTA_CFG_MBED_MESH_API_SELECTED_RF_CHANNEL)
+#else
+#define USE_CHANNEL       1<<12
 #define ALL_CHANNELS    0x07fff800
+#endif
 
 #ifdef  YOTTA_CFG_MBED_MESH_API_SCAN_CHANNEL_LIST
 // use mbed OS configuration if it is available
 #define SCAN_CHANNEL_LIST   YOTTA_CFG_MBED_MESH_API_SCAN_CHANNEL_LIST
 #else
-#define SCAN_CHANNEL_LIST   CHANNEL_12
+#define SCAN_CHANNEL_LIST   USE_CHANNEL
 #endif
 
 /*
