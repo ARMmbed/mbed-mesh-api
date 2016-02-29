@@ -39,8 +39,6 @@ void mesh_system_send_connect_event(uint8_t receiver);
  */
 void mesh_system_init(void);
 
-
-
 #ifdef __cplusplus
 }
 #endif

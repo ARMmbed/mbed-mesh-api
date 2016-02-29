@@ -194,8 +194,8 @@ void nd_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
-    tasklet_data_ptr->channel_list.channel_page = FHSS_CHANNEL_PAGE;
-    tasklet_data_ptr->channel_list.channel_mask[0] = SCAN_CHANNEL_LIST;
+    tasklet_data_ptr->channel_list.channel_page = (channel_page_e)YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE;
+    tasklet_data_ptr->channel_list.channel_mask[0] = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK;
 
     // configure bootstrap
     arm_nwk_interface_configure_6lowpan_bootstrap_set(

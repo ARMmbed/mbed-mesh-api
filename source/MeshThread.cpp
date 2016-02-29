@@ -43,7 +43,7 @@ MeshThread::~MeshThread()
 mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_t callbackHandler, uint8_t *eui64, char *pskd)
 {
 
-    if (eui64 == NULL || pskd == NULL) {
+    if (eui64 == NULL) {
         return MESH_ERROR_PARAM;
     }
 
@@ -61,4 +61,3 @@ mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_
     // TODO: Use test values for device configuration
     return MeshThread::init(registered_device_id, callbackHandler, NULL, NULL);
 }
-

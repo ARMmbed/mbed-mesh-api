@@ -26,7 +26,7 @@
 #define TRACE_GROUP  "mesh_appl"
 
 // Bootstrap mode, if undefined then 6LoWPAN-ND mode is used
-//#define BOOTSTRAP_MODE_THREAD
+#define BOOTSTRAP_MODE_THREAD
 
 // mesh network state
 static mesh_connection_status_t mesh_network_state = MESH_DISCONNECTED;

@@ -20,6 +20,7 @@
 #include "net_interface.h"
 #include "nsdynmemLIB.h"
 #include "thread_management_if.h"
+#include "net_polling_api.h"
 #include "include/thread_tasklet.h"
 #include "include/static_config.h"
 #include "include/mesh_system.h"
@@ -27,6 +28,13 @@
 #define HAVE_DEBUG 1
 #include "ns_trace.h"
 #define TRACE_GROUP  "m6Thread"
+
+#define DETAILED_TRACES
+#ifdef DETAILED_TRACES
+#define TRACE_DETAIL    tr_debug
+#else
+#define TRACE_DETAIL(...)
+#endif
 
 #define INTERFACE_NAME   "6L-THREAD"
 
@@ -153,6 +161,11 @@ void thread_tasklet_parse_network_event(arm_event_s *event)
             /* Network is ready and node is connected to Access Point */
             if (thread_tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY) {
                 tr_info("Thread bootstrap ready");
+                if (thread_tasklet_data_ptr->operating_mode == NET_6LOWPAN_SLEEPY_HOST) {
+                    if (arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_FAST_POLL_MODE, YOTTA_CFG_MBED_MESH_API_THREAD_POLLRATE) == 0) {
+                        tr_error("Failed to set poll rate to %d", YOTTA_CFG_MBED_MESH_API_THREAD_POLLRATE);
+                    }
+                }
                 thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
                 thread_tasklet_trace_bootstrap_info();
                 thread_tasklet_network_state_changed(MESH_CONNECTED);
@@ -202,34 +215,87 @@ void thread_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
-    thread_tasklet_data_ptr->channel_list.channel_page = FHSS_CHANNEL_PAGE;
-    thread_tasklet_data_ptr->channel_list.channel_mask[0] = SCAN_CHANNEL_LIST;
-
-    thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_ROUTER;
+    if (strcmp(YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE, "SED") == 0) {
+        thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_SLEEPY_HOST;
+    } else {
+        thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_ROUTER;
+    }
 
     arm_nwk_interface_configure_6lowpan_bootstrap_set(
         thread_tasklet_data_ptr->nwk_if_id,
         thread_tasklet_data_ptr->operating_mode,
         NET_6LOWPAN_THREAD);
 
-    arm_nwk_6lowpan_gp_address_mode(thread_tasklet_data_ptr->nwk_if_id, NET_6LOWPAN_GP16_ADDRESS, 0xffff, 1);
-
     // Link configuration
     memcpy(thread_tasklet_data_ptr->link_config.name, "Arm Powered Core", 16);
-    thread_tasklet_data_ptr->link_config.panId =  THREAD_PANID;
-    thread_tasklet_data_ptr->link_config.rfChannel = THREAD_RF_CHANNEL;
-    thread_tasklet_data_ptr->channel_list.channel_page = FHSS_CHANNEL_PAGE;
-    thread_tasklet_data_ptr->channel_list.channel_mask[0] = SCAN_CHANNEL_LIST;
 
-    //Beacon data setting
+    thread_tasklet_data_ptr->link_config.panId = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PANID;
+    TRACE_DETAIL("PANID %x", thread_tasklet_data_ptr->link_config.panId);
+
+    // channel
+    if (YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL > 27) {
+        tr_error("Bad channel %d", YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL);
+        return;
+    }
+
+    thread_tasklet_data_ptr->link_config.rfChannel = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL;
+    thread_tasklet_data_ptr->channel_list.channel_page = (channel_page_e)YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_PAGE;
+    thread_tasklet_data_ptr->channel_list.channel_mask[0] = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_MASK;
+    TRACE_DETAIL("channel: %d", thread_tasklet_data_ptr->link_config.rfChannel);
+    TRACE_DETAIL("channel page: %d", thread_tasklet_data_ptr->channel_list.channel_page);
+    TRACE_DETAIL("channel mask: %d", (int)thread_tasklet_data_ptr->channel_list.channel_mask[0]);
+
+
+    // Beacon data setting
     thread_tasklet_data_ptr->link_config.Protocol_id = 0x03;
     thread_tasklet_data_ptr->link_config.version = 1;
     memcpy(thread_tasklet_data_ptr->link_config.extended_random_mac, device_configuration.eui64, 8);
     thread_tasklet_data_ptr->link_config.extended_random_mac[0] |= 0x02;
 
-    memcpy(thread_tasklet_data_ptr->link_config.mesh_local_ula_prefix, "\xFD\0\x0d\xb8\0\0\0\0", 8);
-    const uint8_t default_net_security_key[16] = {0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff};
-    memcpy(thread_tasklet_data_ptr->link_config.master_key, default_net_security_key, 16);
+    // Mesh prefix
+    const uint8_t mesh_local_prefix[] = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_ML_PREFIX;
+    if (sizeof(mesh_local_prefix) == 8) {
+        memcpy(thread_tasklet_data_ptr->link_config.mesh_local_ula_prefix, mesh_local_prefix, 8);
+        TRACE_DETAIL("Mesh prefix: %s", trace_array(mesh_local_prefix, 8));
+    } else {
+        tr_error("Mesh prefix, must be 8 hex chars: %s", mesh_local_prefix);
+        return;
+    }
+
+    // Master Key
+    const uint8_t master_key[] = YOTTA_CFG_MBED_MESH_API_THREAD_MASTER_KEY;
+    if (sizeof(master_key) == 16) {
+        memcpy(thread_tasklet_data_ptr->link_config.master_key, master_key, 16);
+        TRACE_DETAIL("Master key: %s", trace_array(master_key, 16));
+    } else {
+        tr_error("Master key must be 16 hex chars: %s", master_key);
+        return;
+    }
+
+    // PSKc
+    const uint8_t PSKc[] = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PSKC;
+    if (sizeof(PSKc) == 16) {
+        memcpy(thread_tasklet_data_ptr->link_config.PSKc, PSKc, 16);
+        TRACE_DETAIL("PSKc: %s", trace_array(PSKc, 16));
+    } else {
+        tr_error("PSKc must be 16 hex chars: %s", PSKc);
+        return;
+    }
+
+    // PSKd
+    const char PSKd[] = YOTTA_CFG_MBED_MESH_API_THREAD_PSKD;
+    if (sizeof(PSKd) < 7) {
+        tr_error("PSKd length must be > 6: %s", PSKd);
+        return;
+    }
+
+    char *dyn_buf = ns_dyn_mem_alloc(sizeof(PSKd));
+    strcpy(dyn_buf, PSKd);
+    ns_dyn_mem_free(device_configuration.PSKd_ptr);
+    device_configuration.PSKd_ptr = (uint8_t*)dyn_buf;
+    device_configuration.PSKd_len = sizeof(PSKd) - 1;
+    TRACE_DETAIL("PSKd: %s", device_configuration.PSKd_ptr);
+
     thread_tasklet_data_ptr->link_config.key_rotation = 3600;
     thread_tasklet_data_ptr->link_config.key_sequence = 0;
 
@@ -242,7 +308,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
 
     if (status >= 0) {
         thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_STARTED;
-        tr_info("Start 6LoWPAN Thread bootstrap");
+        tr_info("Start Thread bootstrap (%s mode)", thread_tasklet_data_ptr->operating_mode == NET_6LOWPAN_SLEEPY_HOST ? "SED" : "Router");
     } else {
         thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_FAILED;
         tr_err("Bootstrap start failed, %d", status);
@@ -359,9 +425,7 @@ int8_t thread_tasklet_network_init(int8_t device_id)
 
 void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd)
 {
-    device_configuration.PSKd_ptr = ns_dyn_mem_alloc(strlen(pskd) + 1);
-    device_configuration.PSKd_len = strlen(pskd);
-    memcpy(device_configuration.PSKd_ptr, pskd, strlen(pskd));
+    (void) pskd; // this parameter is delivered via yotta configuration
     memcpy(device_configuration.eui64, eui64, 8);
 }
 
