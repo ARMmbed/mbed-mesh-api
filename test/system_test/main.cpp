@@ -86,6 +86,9 @@ public:
             case 6:
                 test_mesh_api_connect(rf_device_id, MESH_TYPE_THREAD);
                 break;
+            case 7:
+                test_mesh_api_data_poll_rate_set_thread(rf_device_id);
+                break;
 #endif // TEST_THREAD_BOOTSTRAP
             default:
                 endTest(tests_pass);

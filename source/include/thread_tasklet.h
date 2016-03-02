@@ -61,7 +61,7 @@ int8_t thread_tasklet_network_init(int8_t device_id);
  * \param eui64 mac address of the registered rf device
  * \param pskd private shared key
  */
-void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd);
+void thread_tasklet_device_config_set(uint8_t *eui64, char *pskd);
 
 /*
  * \brief Disconnect network interface.
@@ -71,6 +71,15 @@ void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd);
  * \return < 0 in case of errors
  */
 int8_t thread_tasklet_disconnect(bool send_cb);
+
+/*
+ * \brief Set device data polling rate
+ *
+ * \param timeout timeout between data polls
+ * \return  0 on success
+ * \return < 0 in case of errors
+ */
+int8_t thread_tasklet_data_poll_rate_set(uint32_t timeout);
 
 #ifdef __cplusplus
 }

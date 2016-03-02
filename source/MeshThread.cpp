@@ -50,7 +50,7 @@ mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_
     mesh_error_t status = AbstractMesh::init(registered_device_id, callbackHandler);
 
     if (status == MESH_ERROR_NONE) {
-        thread_tasklet_set_device_config(eui64, pskd);
+        thread_tasklet_device_config_set(eui64, pskd);
     }
 
     return status;
@@ -61,3 +61,24 @@ mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_
     // TODO: Use test values for device configuration
     return MeshThread::init(registered_device_id, callbackHandler, NULL, NULL);
 }
+
+mesh_error_t MeshThread::data_poll_rate_set(uint32_t pollrate)
+{
+    mesh_error_t status = MESH_ERROR_NONE;
+    int8_t retval = thread_tasklet_data_poll_rate_set(pollrate);
+    switch (retval) {
+        case 0:
+            status = MESH_ERROR_NONE;
+            break;
+        case -2:
+            status = MESH_ERROR_PARAM;
+            break;
+        default:
+        //case -1:
+            status = MESH_ERROR_UNKNOWN;
+            break;
+    }
+
+    return status;
+}
+

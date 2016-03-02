@@ -50,6 +50,14 @@ typedef enum {
     MESH_BOOTSTRAP_FAILED           /*<! error in bootstrap */
 } mesh_connection_status_t;
 
+/*
+ * Mesh device types
+ */
+typedef enum {
+    MESH_DEVICE_TYPE_THREAD_ROUTER = 0,         /*<! Thread router */
+    MESH_DEVICE_TYPE_THREAD_SLEEPY_END_DEVICE  /*<! Thread Sleepy end device */
+} mesh_device_type_t;
+
 #ifdef __cplusplus
 }
 #endif

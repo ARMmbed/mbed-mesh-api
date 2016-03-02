@@ -161,11 +161,6 @@ void thread_tasklet_parse_network_event(arm_event_s *event)
             /* Network is ready and node is connected to Access Point */
             if (thread_tasklet_data_ptr->tasklet_state != TASKLET_STATE_BOOTSTRAP_READY) {
                 tr_info("Thread bootstrap ready");
-                if (thread_tasklet_data_ptr->operating_mode == NET_6LOWPAN_SLEEPY_HOST) {
-                    if (arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_FAST_POLL_MODE, YOTTA_CFG_MBED_MESH_API_THREAD_POLLRATE) == 0) {
-                        tr_error("Failed to set poll rate to %d", YOTTA_CFG_MBED_MESH_API_THREAD_POLLRATE);
-                    }
-                }
                 thread_tasklet_data_ptr->tasklet_state = TASKLET_STATE_BOOTSTRAP_READY;
                 thread_tasklet_trace_bootstrap_info();
                 thread_tasklet_network_state_changed(MESH_CONNECTED);
@@ -215,7 +210,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
-    if (strcmp(YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE, "SED") == 0) {
+    if (YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE == MESH_DEVICE_TYPE_THREAD_SLEEPY_END_DEVICE) {
         thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_SLEEPY_HOST;
     } else {
         thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_ROUTER;
@@ -423,9 +418,23 @@ int8_t thread_tasklet_network_init(int8_t device_id)
                                   INTERFACE_NAME);
 }
 
-void thread_tasklet_set_device_config(uint8_t *eui64, char *pskd)
+void thread_tasklet_device_config_set(uint8_t *eui64, char *pskd)
 {
     (void) pskd; // this parameter is delivered via yotta configuration
     memcpy(device_configuration.eui64, eui64, 8);
+}
+
+int8_t thread_tasklet_data_poll_rate_set(uint32_t timeout)
+{
+    int8_t status = -1;
+    if (thread_tasklet_data_ptr) {
+        if (timeout != 0) {
+            status = arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_SLOW_POLL_MODE, timeout);
+        } else {
+            status = arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_FAST_POLL_MODE, timeout);
+        }
+    }
+
+    return status;
 }
 
