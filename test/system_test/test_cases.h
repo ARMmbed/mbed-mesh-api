@@ -26,5 +26,6 @@ void test_mesh_api_init_thread(int8_t rf_device_id);
 void test_mesh_api_connect(int8_t rf_device_id, mesh_network_type_t type);
 void test_mesh_api_disconnect(int8_t rf_device_id, mesh_network_type_t type);
 void test_mesh_api_delete_connected(int8_t rf_device_id, mesh_network_type_t type);
+void test_mesh_api_data_poll_rate_set_thread(int8_t rf_device_id);
 
 #endif /* __TEST_CASES__H__ */

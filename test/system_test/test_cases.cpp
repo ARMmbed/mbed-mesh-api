@@ -18,6 +18,7 @@
 #include "mbed-mesh-api/Mesh6LoWPAN_ND.h"
 #include "mbed-mesh-api/MeshThread.h"
 #include "mbed-mesh-api/MeshInterfaceFactory.h"
+#include "mbed-mesh-api/mesh_interface_types.h"
 #include "sal/test/ctest_env.h"
 #include "atmel-rf-driver/driverRFPhy.h"    // rf_device_register
 #include "test_cases.h"
@@ -36,6 +37,10 @@ static uint8_t mesh_network_state = MESH_DISCONNECTED;
 AbstractMesh *mesh_api = NULL;
 
 extern void test_result_notify(int result, AbstractMesh *meshAPI);
+
+// Thread device type, currently defined statically, change also
+// YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE from static_config.h to match selection
+#define TEST_THREAD_DEVICE_TYPE_SED false
 
 /*
  * Callback from mesh network. Called when network state changes.
@@ -378,3 +383,104 @@ void test_mesh_api_delete_connected(int8_t rf_device_id, mesh_network_type_t typ
         break;
     } while (1);
 }
+
+
+/*
+ * Callback from mesh network for test_mesh_api_data_poll_rate_set_thread test
+ */
+void test_callback_data_poll_rate_set_thread(mesh_connection_status_t mesh_state)
+{
+    tr_info("test_callback_data_poll_rate_set() %d", mesh_state);
+    mesh_network_state = mesh_state;
+
+    if (mesh_network_state == MESH_CONNECTED) {
+        tr_info("Connected to mesh network!");
+
+#if (TEST_THREAD_DEVICE_TYPE_SED == true)
+        mesh_error_t err;
+        // set data polling rate to 0 (enables fast polling mode)
+        err = ((MeshThread*)mesh_api)->data_poll_rate_set(0);
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            return;
+        }
+
+        // try to set data polling rate to 100000
+        err = ((MeshThread*)mesh_api)->data_poll_rate_set(864001+1);
+        if (!TEST_EQ(err, MESH_ERROR_PARAM)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            return;
+        }
+
+        // OK case, set data polling rate to 5
+        err = ((MeshThread*)mesh_api)->data_poll_rate_set(5);
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            return;
+        }
+#endif
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
+    } else if (mesh_network_state == MESH_DISCONNECTED) {
+        tr_info("Disconnected from mesh network!");
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
+    } else {
+        // untested branch, catch errors by bad state checking...
+        TEST_EQ(true, false);
+        tr_error("Networking error!");
+        TEST_RESULT_PRINT();
+        test_result_notify(test_pass_global, mesh_api);
+    }
+}
+
+void test_mesh_api_data_poll_rate_set_thread(int8_t rf_device_id)
+{
+    mesh_error_t err;
+
+    TEST_PRINT("\r\nBegin %s\r\n", __func__);
+
+    mesh_api = MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
+
+    do {
+        // try to set data polling rate when not initialized
+        err = ((MeshThread*)mesh_api)->data_poll_rate_set(1);
+        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+
+        uint8_t eui64[8];
+        rf_read_mac_address(eui64);
+        err = ((MeshThread *)mesh_api)->init(rf_device_id, test_callback_data_poll_rate_set_thread, eui64, NULL);
+
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+
+        // try to set data polling rate when not connected
+        err = ((MeshThread*)mesh_api)->data_poll_rate_set(1);
+        if (!TEST_EQ(err, MESH_ERROR_UNKNOWN)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+
+        // successful connect
+        err = mesh_api->connect();
+        if (!TEST_EQ(err, MESH_ERROR_NONE)) {
+            TEST_RESULT_PRINT();
+            test_result_notify(test_pass_global, mesh_api);
+            break;
+        }
+        //test continues in callback
+        break;
+    } while (1);
+}
+

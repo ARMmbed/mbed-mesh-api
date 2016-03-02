@@ -23,8 +23,7 @@ This module supports static configuration via [yotta configuration](#http://yott
   "mbed-mesh-api": {
     "thread": {
       "pskd": "\"Secret password\"",
-      "device_type": "\"Router\"",
-      "pollrate": 300,
+      "device_type": "MESH_DEVICE_TYPE_THREAD_ROUTER",
       "config": {
         "channel_mask": "0x07fff800",
         "channel_page": 0,
@@ -48,8 +47,7 @@ Configurable parameters in section: mbed-mesh-api/thread
 | Parameter name  | Value         | Description |
 | --------------- | ------------- | ----------- |
 | pskd            | string [6-255 chars] | Human-scaled commissioning credentials |
-| device_type     | string ["SED", "Router"] | Set device operating mode to Sleepy End Device (SED) or router (Router) |
-| pollrate        | number | **Sleepy End Device** data polling rate in milliseconds |
+| device_type     | enum from mesh_device_type_t | Set device operating mode. |
 | channel_mask    | number [0-0x07fff800] | Channel mask, 0x07fff800 scan all channels |
 | channel_page    | number [0, 2]| Channel page, 0 for 2,4 GHz and 2 for sub-GHz radios |
 | channel         | number [0-27] | RF channel to use |
