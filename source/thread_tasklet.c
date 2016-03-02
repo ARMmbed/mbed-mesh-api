@@ -431,7 +431,7 @@ int8_t thread_tasklet_data_poll_rate_set(uint32_t timeout)
         if (timeout != 0) {
             status = arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_SLOW_POLL_MODE, timeout);
         } else {
-            status = arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_FAST_POLL_MODE, timeout);
+            status = arm_nwk_host_mode_set(thread_tasklet_data_ptr->nwk_if_id, NET_HOST_RX_ON_IDLE, timeout);
         }
     }
 
