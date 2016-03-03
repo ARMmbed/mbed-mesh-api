@@ -50,8 +50,9 @@ public:
     virtual mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler);
 
     /**
-     * \brief Set device data polling rate.
-     * \param pollrate data polling rate in seconds. 0 enables default data polling rate.
+     * \brief Set device data polling rate to value given in parameter pollrate. Data polling will be
+     * disabled if pollrate value is 0.
+     * \param pollrate data polling rate in seconds. Setting this to 0 disables data polling.
      * \return MESH_ERROR_NONE on success.
      * \return MESH_ERROR_PARAM in case timeout value is bigger than 864001.
      * \return MESH_ERROR_UNKNOWN in case of other error.
