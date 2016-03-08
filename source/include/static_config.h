@@ -46,6 +46,10 @@ extern "C" {
 #define YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE 0
 #endif
 
+#ifndef YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL
+#define YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL 0
+#endif
+
 /* Thread configuration */
 #ifndef YOTTA_CFG_MBED_MESH_API_THREAD_PSKD
 // PSKd, must be longer than 6
