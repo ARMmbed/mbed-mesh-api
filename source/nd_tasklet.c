@@ -76,6 +76,30 @@ void nd_tasklet_configure_and_connect_to_network(void);
 void nd_tasklet_trace_bootstrap_info(void);
 #endif
 
+static void initialize_channel_list(void)
+{
+    uint32_t channel = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL;
+
+    const int_fast8_t word_index = channel / 32;
+     const int_fast8_t bit_index = channel % 32;
+
+    memset(&tasklet_data_ptr->channel_list, 0, sizeof(tasklet_data_ptr->channel_list));
+
+    tasklet_data_ptr->channel_list.channel_page = (channel_page_e)YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE;
+    tasklet_data_ptr->channel_list.channel_mask[0] = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK;
+
+    if (channel > 0) {
+        memset(&tasklet_data_ptr->channel_list.channel_mask, 0, sizeof(tasklet_data_ptr->channel_list.channel_mask));
+        tasklet_data_ptr->channel_list.channel_mask[word_index] |= ((uint32_t) 1 << bit_index);
+    }
+
+    arm_nwk_set_channel_list(tasklet_data_ptr->network_interface_id, &tasklet_data_ptr->channel_list);
+
+    tr_error("Channel: %ld", channel);
+    tr_error("Channel page: %d", tasklet_data_ptr->channel_list.channel_page);
+    tr_error("Channel mask: %ld", tasklet_data_ptr->channel_list.channel_mask[word_index]);
+}
+
 /*
  * \brief A function which will be eventually called by NanoStack OS when ever the OS has an event to deliver.
  * @param event, describes the sender, receiver and event type.
@@ -194,9 +218,6 @@ void nd_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
-    tasklet_data_ptr->channel_list.channel_page = (channel_page_e)YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE;
-    tasklet_data_ptr->channel_list.channel_mask[0] = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK;
-
     // configure bootstrap
     arm_nwk_interface_configure_6lowpan_bootstrap_set(
         tasklet_data_ptr->network_interface_id, tasklet_data_ptr->mode,
@@ -212,7 +233,7 @@ void nd_tasklet_configure_and_connect_to_network(void)
     arm_nwk_6lowpan_link_scan_parameter_set(tasklet_data_ptr->network_interface_id, 5);
 
     // configure scan channels
-    arm_nwk_set_channel_list(tasklet_data_ptr->network_interface_id, &tasklet_data_ptr->channel_list);
+    initialize_channel_list();
 
     // Configure scan options (NULL disables filter)
     arm_nwk_6lowpan_link_nwk_id_filter_for_nwk_scan(
