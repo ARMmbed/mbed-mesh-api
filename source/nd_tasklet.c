@@ -35,6 +35,9 @@
 
 #define INVALID_INTERFACE_ID        (-1)
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
 /*
  * Mesh tasklet states.
  */
@@ -217,16 +220,30 @@ void nd_tasklet_parse_network_event(arm_event_s *event)
 void nd_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
+    char *sec_mode;
 
     // configure bootstrap
     arm_nwk_interface_configure_6lowpan_bootstrap_set(
         tasklet_data_ptr->network_interface_id, tasklet_data_ptr->mode,
         NET_6LOWPAN_ND_WITH_MLE);
 
+    sec_mode = STR(YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_SECURITY_MODE);
+
+    if (strcmp(sec_mode, "PSK") == 0) {
+        tr_debug("Using PSK security mode.");
+        tasklet_data_ptr->sec_mode = NET_SEC_MODE_PSK_LINK_SECURITY;
+        tasklet_data_ptr->psk_sec_info.key_id = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_PSK_KEY_ID;
+        memcpy(tasklet_data_ptr->psk_sec_info.security_key, (const uint8_t[16])YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_PSK_KEY, 16);
+    } else {
+        tr_debug("Link-layer security NOT enabled.");
+        tasklet_data_ptr->sec_mode = NET_SEC_MODE_NO_LINK_SECURITY;
+    }
+
     // configure link layer security
     arm_nwk_link_layer_security_mode(
         tasklet_data_ptr->network_interface_id,
-        tasklet_data_ptr->sec_mode, tasklet_data_ptr->psk_sec_info.key_id,
+        tasklet_data_ptr->sec_mode,
+        YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_SEC_LEVEL,
         &tasklet_data_ptr->psk_sec_info);
 
     // configure scan parameters
