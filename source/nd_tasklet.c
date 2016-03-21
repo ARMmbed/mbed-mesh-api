@@ -84,7 +84,7 @@ static void initialize_channel_list(void)
     uint32_t channel = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL;
 
     const int_fast8_t word_index = channel / 32;
-     const int_fast8_t bit_index = channel % 32;
+    const int_fast8_t bit_index = channel % 32;
 
     memset(&tasklet_data_ptr->channel_list, 0, sizeof(tasklet_data_ptr->channel_list));
 
@@ -98,9 +98,9 @@ static void initialize_channel_list(void)
 
     arm_nwk_set_channel_list(tasklet_data_ptr->network_interface_id, &tasklet_data_ptr->channel_list);
 
-    tr_error("Channel: %ld", channel);
-    tr_error("Channel page: %d", tasklet_data_ptr->channel_list.channel_page);
-    tr_error("Channel mask: %ld", tasklet_data_ptr->channel_list.channel_mask[word_index]);
+    tr_debug("Channel: %ld", channel);
+    tr_debug("Channel page: %d", tasklet_data_ptr->channel_list.channel_page);
+    tr_debug("Channel mask: %ld", tasklet_data_ptr->channel_list.channel_mask[word_index]);
 }
 
 /*
