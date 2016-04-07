@@ -49,6 +49,8 @@ public:
      */
     virtual mesh_error_t init(int8_t registered_device_id, mesh_network_handler_t callbackHandler);
 
+    bool getOwnIpAddress(char *address, int8_t len);
+
     /**
      * \brief Set device data polling rate to value given in parameter pollrate. Data polling will be
      * disabled if pollrate value is 0.

@@ -62,6 +62,15 @@ mesh_error_t MeshThread::init(int8_t registered_device_id, mesh_network_handler_
     return MeshThread::init(registered_device_id, callbackHandler, NULL, NULL);
 }
 
+bool MeshThread::getOwnIpAddress(char *address, int8_t len)
+{
+    tr_debug("getOwnIpAddress()");
+    if (thread_tasklet_get_ip_address(address, len) == 0) {
+        return true;
+    }
+    return false;
+}
+
 mesh_error_t MeshThread::data_poll_rate_set(uint32_t pollrate)
 {
     mesh_error_t status = MESH_ERROR_NONE;
