@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stdio.h>
 #include "eventOS_scheduler.h"
 #include "eventOS_event.h"
 #include "net_interface.h"
@@ -53,6 +54,13 @@ static void mesh_system_heap_error_handler(heap_fail_t event)
     while (1);
 }
 
+// mbed fails to auto-add CR before LF when outputting over the
+// serial port, so \n is not sufficient to get a proper newline.
+static void trace_print(const char *str)
+{
+    printf("%s\r\n", str);
+}
+
 void mesh_system_init(void)
 {
     if (mesh_initialized == false) {
@@ -62,6 +70,7 @@ void mesh_system_init(void)
         platform_timer_enable();
         eventOS_scheduler_init();
         trace_init(); // trace system needs to be initialized right after eventOS_scheduler_init
+        set_trace_print_function(trace_print);
         net_init_core();
         /* initialize 6LoWPAN socket adaptation layer */
         ns_sal_init_stack();
