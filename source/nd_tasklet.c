@@ -416,8 +416,12 @@ void nd_tasklet_init(void)
 int8_t nd_tasklet_network_init(int8_t device_id)
 {
     // TODO, read interface name from configuration
-    mac_api_t *api = ns_sw_mac_create(device_id);
-    bool use_tunnel = arm_net_phy_driver_use_tunnel(device_id);
-    return arm_nwk_interface_lowpan_init(api, use_tunnel, INTERFACE_NAME);
+    mac_description_storage_size_t storage_sizes;
+    storage_sizes.device_decription_table_size = 32;
+    storage_sizes.key_description_table_size = 3;
+    storage_sizes.key_lookup_size = 1;
+    storage_sizes.key_usage_size = 3;
+    mac_api_t *api = ns_sw_mac_create(device_id, &storage_sizes);
+    return arm_nwk_interface_lowpan_init(api, INTERFACE_NAME);
 }
 
