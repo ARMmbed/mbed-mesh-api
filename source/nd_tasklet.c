@@ -28,6 +28,9 @@
 #include "ns_trace.h"
 #define TRACE_GROUP  "m6LND"
 
+#include "mac_api.h"
+#include "sw_mac.h"
+
 #define INTERFACE_NAME   "6L-ND"
 
 // Tasklet timer events
@@ -413,7 +416,8 @@ void nd_tasklet_init(void)
 int8_t nd_tasklet_network_init(int8_t device_id)
 {
     // TODO, read interface name from configuration
-    return arm_nwk_interface_init(NET_INTERFACE_RF_6LOWPAN, device_id,
-                                  INTERFACE_NAME);
+    mac_api_t *api = ns_sw_mac_create(device_id);
+    bool use_tunnel = arm_net_phy_driver_use_tunnel(device_id);
+    return arm_nwk_interface_lowpan_init(api, use_tunnel, INTERFACE_NAME);
 }
 
