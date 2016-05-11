@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
+#ifdef YOTTA_CFG
+/* At the moment, nothing in the Yotta build is providing these */
 void arm_random_module_init(void)
 {
 }
@@ -25,3 +25,4 @@ uint32_t arm_random_seed_get(void)
 {
     return 0;
 }
+#endif
