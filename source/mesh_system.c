@@ -20,7 +20,11 @@
 #include "nsdynmemLIB.h"
 #include "randLIB.h"
 #include "platform/arm_hal_timer.h"
+#ifdef YOTTA_CFG
 #include "sal-iface-6lowpan/ns_sal.h"
+#else
+#include "ns_event_loop.h"
+#endif
 #include "include/mesh_system.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
@@ -61,10 +65,15 @@ void mesh_system_init(void)
         randLIB_seed_random();
         platform_timer_enable();
         eventOS_scheduler_init();
+#ifndef YOTTA_CFG
+        ns_event_loop_thread_create();
+#endif
         trace_init(); // trace system needs to be initialized right after eventOS_scheduler_init
         net_init_core();
+#ifdef YOTTA_CFG
         /* initialize 6LoWPAN socket adaptation layer */
         ns_sal_init_stack();
+#endif
         mesh_initialized = true;
     }
 }
