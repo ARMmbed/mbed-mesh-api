@@ -28,7 +28,11 @@
 #define TRACE_GROUP  "m6-mesh-system"
 
 /* Heap for NanoStack */
+#ifdef YOTTA_CFG_MBED_MESH_API_HEAP_SIZE
+#define MESH_HEAP_SIZE YOTTA_CFG_MBED_MESH_API_HEAP_SIZE
+#else
 #define MESH_HEAP_SIZE 32500
+#endif
 static uint8_t app_stack_heap[MESH_HEAP_SIZE + 1];
 static bool mesh_initialized = false;
 

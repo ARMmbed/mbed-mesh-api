@@ -21,6 +21,7 @@ This module supports static configuration via [yotta configuration](#http://yott
 
 ```
   "mbed-mesh-api": {
+    "heap_size": 32500,
     "thread": {
       "pskd": "\"Secret password\"",
       "device_type": "MESH_DEVICE_TYPE_THREAD_ROUTER",
@@ -41,6 +42,12 @@ This module supports static configuration via [yotta configuration](#http://yott
     }
   }
 ```
+
+Configurable parameters in section: mbed-mesh-api
+
+| Parameter name  | Value         | Description |
+| --------------- | ------------- | ----------- |
+| heap_size       | number [0-0xfffe] | Nanostack internal heap size |
 
 Configurable parameters in section: mbed-mesh-api/thread
 
