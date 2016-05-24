@@ -18,7 +18,7 @@
     "sal-iface-6lowpan": "^2.0.0"
   },
   "testDependencies": {
-    "atmel-rf-driver": "^3.0.0"
+    "atmel-rf-driver": "^2.0.0"
   },
   "targetDependencies": {}
 }
