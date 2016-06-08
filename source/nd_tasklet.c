@@ -87,15 +87,15 @@ void nd_tasklet_trace_bootstrap_info(void);
 
 static void initialize_channel_list(void)
 {
-    uint32_t channel = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL;
+    uint32_t channel = MBED_MESH_API_6LOWPAN_ND_CHANNEL;
 
     const int_fast8_t word_index = channel / 32;
     const int_fast8_t bit_index = channel % 32;
 
     memset(&tasklet_data_ptr->channel_list, 0, sizeof(tasklet_data_ptr->channel_list));
 
-    tasklet_data_ptr->channel_list.channel_page = (channel_page_e)YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE;
-    tasklet_data_ptr->channel_list.channel_mask[0] = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK;
+    tasklet_data_ptr->channel_list.channel_page = (channel_page_e)MBED_MESH_API_6LOWPAN_ND_CHANNEL_PAGE;
+    tasklet_data_ptr->channel_list.channel_mask[0] = MBED_MESH_API_6LOWPAN_ND_CHANNEL_MASK;
 
     if (channel > 0) {
         memset(&tasklet_data_ptr->channel_list.channel_mask, 0, sizeof(tasklet_data_ptr->channel_list.channel_mask));
@@ -233,13 +233,13 @@ void nd_tasklet_configure_and_connect_to_network(void)
         tasklet_data_ptr->network_interface_id, tasklet_data_ptr->mode,
         NET_6LOWPAN_ND_WITH_MLE);
 
-    sec_mode = STR(YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_SECURITY_MODE);
+    sec_mode = STR(MBED_MESH_API_6LOWPAN_ND_SECURITY_MODE);
 
     if (strcmp(sec_mode, "PSK") == 0) {
         tr_debug("Using PSK security mode.");
         tasklet_data_ptr->sec_mode = NET_SEC_MODE_PSK_LINK_SECURITY;
-        tasklet_data_ptr->psk_sec_info.key_id = YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_PSK_KEY_ID;
-        memcpy(tasklet_data_ptr->psk_sec_info.security_key, (const uint8_t[16])YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_PSK_KEY, 16);
+        tasklet_data_ptr->psk_sec_info.key_id = MBED_MESH_API_6LOWPAN_ND_PSK_KEY_ID;
+        memcpy(tasklet_data_ptr->psk_sec_info.security_key, (const uint8_t[16])MBED_MESH_API_6LOWPAN_ND_PSK_KEY, 16);
     } else {
         tr_debug("Link-layer security NOT enabled.");
         tasklet_data_ptr->sec_mode = NET_SEC_MODE_NO_LINK_SECURITY;
@@ -249,7 +249,7 @@ void nd_tasklet_configure_and_connect_to_network(void)
     arm_nwk_link_layer_security_mode(
         tasklet_data_ptr->network_interface_id,
         tasklet_data_ptr->sec_mode,
-        YOTTA_CFG_MBED_MESH_API_6LOWPAN_ND_SEC_LEVEL,
+        MBED_MESH_API_6LOWPAN_ND_SEC_LEVEL,
         &tasklet_data_ptr->psk_sec_info);
 
     // configure scan parameters

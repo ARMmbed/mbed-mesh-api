@@ -25,6 +25,7 @@
 #else
 #include "ns_hal_init.h"
 #endif
+#include "include/static_config.h"
 #include "include/mesh_system.h"
 // For tracing we need to define flag, have include and define group
 #define HAVE_DEBUG 1
@@ -32,12 +33,7 @@
 #define TRACE_GROUP  "m6-mesh-system"
 
 /* Heap for NanoStack */
-#ifdef YOTTA_CFG_MBED_MESH_API_HEAP_SIZE
-#define MESH_HEAP_SIZE YOTTA_CFG_MBED_MESH_API_HEAP_SIZE
-#else
-#define MESH_HEAP_SIZE 32500
-#endif
-static uint8_t app_stack_heap[MESH_HEAP_SIZE + 1];
+static uint8_t app_stack_heap[MBED_MESH_API_HEAP_SIZE + 1];
 static bool mesh_initialized = false;
 
 /*
@@ -65,13 +61,13 @@ void mesh_system_init(void)
 {
     if (mesh_initialized == false) {
 #ifndef YOTTA_CFG
-        ns_hal_init(app_stack_heap, MESH_HEAP_SIZE,
+        ns_hal_init(app_stack_heap, MBED_MESH_API_HEAP_SIZE,
                     mesh_system_heap_error_handler, NULL);
         eventOS_scheduler_mutex_wait();
         net_init_core();
         eventOS_scheduler_mutex_release();
 #else
-        ns_dyn_mem_init(app_stack_heap, MESH_HEAP_SIZE,
+        ns_dyn_mem_init(app_stack_heap, MBED_MESH_API_HEAP_SIZE,
                         mesh_system_heap_error_handler, NULL);
         randLIB_seed_random();
         platform_timer_enable();

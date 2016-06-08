@@ -217,7 +217,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
 {
     int8_t status;
 
-    if (YOTTA_CFG_MBED_MESH_API_THREAD_DEVICE_TYPE == MESH_DEVICE_TYPE_THREAD_SLEEPY_END_DEVICE) {
+    if (MBED_MESH_API_THREAD_DEVICE_TYPE == MESH_DEVICE_TYPE_THREAD_SLEEPY_END_DEVICE) {
         thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_SLEEPY_HOST;
     } else {
         thread_tasklet_data_ptr->operating_mode = NET_6LOWPAN_ROUTER;
@@ -231,18 +231,18 @@ void thread_tasklet_configure_and_connect_to_network(void)
     // Link configuration
     memcpy(thread_tasklet_data_ptr->link_config.name, "Arm Powered Core", 16);
 
-    thread_tasklet_data_ptr->link_config.panId = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PANID;
+    thread_tasklet_data_ptr->link_config.panId = MBED_MESH_API_THREAD_CONFIG_PANID;
     TRACE_DETAIL("PANID %x", thread_tasklet_data_ptr->link_config.panId);
 
     // channel
-    if (YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL > 27) {
-        tr_error("Bad channel %d", YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL);
+    if (MBED_MESH_API_THREAD_CONFIG_CHANNEL > 27) {
+        tr_error("Bad channel %d", MBED_MESH_API_THREAD_CONFIG_CHANNEL);
         return;
     }
 
-    thread_tasklet_data_ptr->link_config.rfChannel = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL;
-    thread_tasklet_data_ptr->channel_list.channel_page = (channel_page_e)YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_PAGE;
-    thread_tasklet_data_ptr->channel_list.channel_mask[0] = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_CHANNEL_MASK;
+    thread_tasklet_data_ptr->link_config.rfChannel = MBED_MESH_API_THREAD_CONFIG_CHANNEL;
+    thread_tasklet_data_ptr->channel_list.channel_page = (channel_page_e)MBED_MESH_API_THREAD_CONFIG_CHANNEL_PAGE;
+    thread_tasklet_data_ptr->channel_list.channel_mask[0] = MBED_MESH_API_THREAD_CONFIG_CHANNEL_MASK;
     TRACE_DETAIL("channel: %d", thread_tasklet_data_ptr->link_config.rfChannel);
     TRACE_DETAIL("channel page: %d", thread_tasklet_data_ptr->channel_list.channel_page);
     TRACE_DETAIL("channel mask: %d", (int)thread_tasklet_data_ptr->channel_list.channel_mask[0]);
@@ -255,7 +255,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
     thread_tasklet_data_ptr->link_config.extended_random_mac[0] |= 0x02;
 
     // Mesh prefix
-    const uint8_t mesh_local_prefix[] = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_ML_PREFIX;
+    const uint8_t mesh_local_prefix[] = MBED_MESH_API_THREAD_CONFIG_ML_PREFIX;
     if (sizeof(mesh_local_prefix) == 8) {
         memcpy(thread_tasklet_data_ptr->link_config.mesh_local_ula_prefix, mesh_local_prefix, 8);
         TRACE_DETAIL("Mesh prefix: %s", trace_array(mesh_local_prefix, 8));
@@ -265,7 +265,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
     }
 
     // Master Key
-    const uint8_t master_key[] = YOTTA_CFG_MBED_MESH_API_THREAD_MASTER_KEY;
+    const uint8_t master_key[] = MBED_MESH_API_THREAD_MASTER_KEY;
     if (sizeof(master_key) == 16) {
         memcpy(thread_tasklet_data_ptr->link_config.master_key, master_key, 16);
         TRACE_DETAIL("Master key: %s", trace_array(master_key, 16));
@@ -275,7 +275,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
     }
 
     // PSKc
-    const uint8_t PSKc[] = YOTTA_CFG_MBED_MESH_API_THREAD_CONFIG_PSKC;
+    const uint8_t PSKc[] = MBED_MESH_API_THREAD_CONFIG_PSKC;
     if (sizeof(PSKc) == 16) {
         memcpy(thread_tasklet_data_ptr->link_config.PSKc, PSKc, 16);
         TRACE_DETAIL("PSKc: %s", trace_array(PSKc, 16));
@@ -285,7 +285,7 @@ void thread_tasklet_configure_and_connect_to_network(void)
     }
 
     // PSKd
-    const char PSKd[] = YOTTA_CFG_MBED_MESH_API_THREAD_PSKD;
+    const char PSKd[] = MBED_MESH_API_THREAD_PSKD;
     if (sizeof(PSKd) < 7) {
         tr_error("PSKd length must be > 6: %s", PSKd);
         return;
