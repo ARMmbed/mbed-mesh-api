@@ -143,7 +143,7 @@ void nd_tasklet_main(arm_event_s *event)
 
             if (event->event_id == TIMER_EVENT_START_BOOTSTRAP) {
                 tr_debug("Restart bootstrap");
-                arm_nwk_interface_up(tasklet_data_ptr->network_interface_id);
+                nd_tasklet_configure_and_connect_to_network();
             }
             break;
 
