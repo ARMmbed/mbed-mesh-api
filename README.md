@@ -1,186 +1,102 @@
 # mbed mesh API
 The ARM mbed mesh API allows the client to use the IPv6 mesh network.
 
-The client can use the `Mesh6LoWPAN_ND` or `MeshThread`object for connecting to the 
-mesh network and when successfully connected, the client can create a socket by 
-using the [mbed C++ socket API](https://github.com/ARMmbed/sockets) to start 
-communication with a remote peer. When the connection is no longer needed the client 
-can close the connection with the `disconnect` method.
+The client can use the `LoWPANNDInterface` or `ThreadInterface` object for connecting to the
+mesh network and when successfully connected, the client can create a socket by
+using the [mbed C++ socket API](https://developer.mbed.org/teams/NetworkSocketAPI/code/NetworkSocketAPI/docs/tip/) to start
+communication with a remote peer.
 
 ### Supported mesh networking modes
 Currently, 6LoWPAN-ND (neighbour discovery) and Thread bootstrap modes are supported.
 
-### Mesh socket
-The mbed mesh API cooperates with module [mbed mesh socket](https://github.com/ARMmbed/sal-iface-6lowpan). 
-The module lists the known mesh socket limitations. Full documentation of the IPv6/6LoWPAN 
-stack can be found in [IPv6/6LoWPAN stack](https://github.com/ARMmbed/sal-stack-nanostack).
-
 ### Module Configuration
 
-This module supports static configuration via [yotta configuration](#http://yottadocs.mbed.com/reference/config.html) by using file `config.json`. Application should create the configuration file if it wants to use other than default settings. An example of the configuration file is as follows:
+This module supports static configuration via **mbed Configuration system** by using file `mbed_app.json`. Application should create the configuration file if it wants to use other than default settings. An example of the configuration file is as follows:
 
 ```
-  "mbed-mesh-api": {
-    "heap_size": 32500,
-    "thread": {
-      "pskd": "\"Secret password\"",
-      "device_type": "MESH_DEVICE_TYPE_THREAD_ROUTER",
-      "config": {
-        "channel_mask": "0x07fff800",
-        "channel_page": 0,
-        "channel": 12,
-        "panid": "0xDEFA",
-        "master_key": "{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}",
-        "ml_prefix": "{0xfd, 0x00, 0x0d, 0xb8, 0x00, 0x00, 0x00, 0x00}",    
-        "pskc": "{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}"
-      }
-    },
-    "6lowpan_nd": {
-      "channel_mask": "0x1000",
-      "channel_page": 0,
-      "channel": 12
+{
+    "target_overrides": {
+        "*": {
+            "target.features_add": ["IPV6"],
+            "mbed-mesh-api.6lowpan-nd-channel": 12,
+            "mbed-mesh-api.6lowpan-nd-channel-mask": "(1<<12)",
+            "mbed-mesh-api.heap-size": 10000
+        }
     }
-  }
+}
 ```
 
 Configurable parameters in section: mbed-mesh-api
 
 | Parameter name  | Value         | Description |
 | --------------- | ------------- | ----------- |
-| heap_size       | number [0-0xfffe] | Nanostack internal heap size |
+| heap-size       | number [0-0xfffe] | Nanostack's internal heap size |
 
-Configurable parameters in section: mbed-mesh-api/thread
+Thread related configuration parameters:
 
 | Parameter name  | Value         | Description |
 | --------------- | ------------- | ----------- |
-| pskd            | string [6-255 chars] | Human-scaled commissioning credentials |
-| device_type     | enum from mesh_device_type_t | Set device operating mode. |
-| channel_mask    | number [0-0x07fff800] | Channel mask, 0x07fff800 scan all channels |
-| channel_page    | number [0, 2]| Channel page, 0 for 2,4 GHz and 2 for sub-GHz radios |
-| channel         | number [0-27] | RF channel to use |
-| panid           | number [0-0xFFFF] | Network identifier |
-| master_key      | byte array [16]| Network master key|
-| ml_prefix       | byte array [8] | Mesh local prefix |
-| pskc            | byte array [16] | Pre-Shared Key for the Commissioner |
+| thread-pskd     | string [6-255 chars] | Human-scaled commissioning credentials |
+| hread-device-type | enum from mesh_device_type_t | Set device operating mode. |
+| thread-config-channel-mask | number [0-0x07fff800] | Channel mask, 0x07fff800 scan all channels |
+| thread-config-channel-page | number [0, 2]| Channel page, 0 for 2,4 GHz and 2 for sub-GHz radios |
+| thread-config-channel      | number [0-27] | RF channel to use |
+| thread-config-panid        | number [0-0xFFFF] | Network identifier |
+| thread-master-key      | byte array [16]| Network master key|
+| thread-config-ml-prefix | byte array [8] | Mesh local prefix |
+| thread-config-pskc      | byte array [16] | Pre-Shared Key for the Commissioner |
 
-Configurable parameters in section: mbed-mesh-api/6lowpan_nd
+6LoWPAN related configuration parameters:
 
 | Parameter name  | Type     | Description |
 | --------------- | ---------| ----------- |
-| channel_mask    | number [0-0x07fff800] | Channel mask, bit-mask of channels to use |
-| channel_page    | number [0, 2] | 0 for 2,4 GHz and 2 for sub-GHz radios |
-| channel         | number [0-27] | RF channel to use when `channel_mask` is not defined |
+| 6lowpan-nd-channel-mask    | number [0-0x07fff800] | Channel mask, bit-mask of channels to use |
+| 6lowpan-nd-channel-page   | number [0, 2] | 0 for 2,4 GHz and 2 for sub-GHz radios |
+| 6lowpan-nd-channel        | number [0-27] | RF channel to use when `channel_mask` is not defined |
+| 6lowpan-nd-security-mode | "NONE" or "PSK" | To use either no security, or Pre shared network key |
+| 6lowpan-nd-psk-key-id | number | PSK key id when PSK is enabled |
+| 6lowpan-nd-psk-key | byte array [16] | Pre shared network key |
+| 6lowpan-nd-sec-level | number [1-7] | Network security level. Use default `5` |
 
 
 ## Usage notes
-This module should not be used directly by the applications. The applications should 
-use the following modules when they are available:
-
-* `connection manager`for handling network connections.
-* `device config API` for configuring the network.
+This module should not be used directly by the applications. The applications should
+use the `LoWPANNDInterface` or `ThreadInterface` directly.
 
 ### Network connection states
-After the initialization, the network state is `MESH_DISCONNECTED`. After a successful connection, 
-the state changes to `MESH_CONNECTED` and when disconnected from the network the 
+After the initialization, the network state is `MESH_DISCONNECTED`. After a successful connection,
+the state changes to `MESH_CONNECTED` and when disconnected from the network the
 state is changed back to `MESH_DISCONNECTED`.
 
-In case of connection errors, the state is changed to some of the connection error 
+In case of connection errors, the state is changed to some of the connection error
 states. In an error state, there is no need to make a `disconnect` request and the
 client is allowed to attempt connecting again.
 
 ## Getting started
-This module contains an example application in the `./test/6lowpan_nd/main.cpp` folder. 
-To build and run the example, read the [instructions](https://github.com/ARMmbed/mbed-mesh-api/tree/master/test/6lowpan_nd).
+
+See example application [mbed-os-example-mesh-minimal](https://github.com/ARMmbed/mbed-os-example-mesh-minimal) for usage.
 
 ## Usage example for 6LoWPAN ND mode
 
-Create a callback function to get the network status:
+Create a network interface
 ```
-void mesh_api_callback(mesh_connection_status_t mesh_status)
-{
-    network_state = mesh_status;
-}
+LoWPANNDInterface mesh;
 ```
-Create a Mesh6LoWPAN_ND class:
-```C++
-Mesh6LoWPAN_ND *meshApi = (Mesh6LoWPAN_ND*)MeshInterfaceFactory::createInterface(MESH_TYPE_6LOWPAN_ND);
-```
-Initialize the object with a registered RF device and callback:
-```C++
-meshApi->init(rf_device_register(), mesh_api_callback);
-```
-Connect to the mesh network:
-```C++
-meshApi->connect();
-```
-Wait for the callback to be called and when successfully connected to the mesh network, create a socket and 
-start communication with the remote end:
-```
-if (network_state == MESH_CONNECTED) {
-    UDPaSocket s(SOCKET_STACK_NANOSTACK_IPV6);
-    s.open(SOCKET_AF_INET6);
-	/* start communication */
-	s.send_to(data, dlen, addr, port);
-}
 
+Connect:
 ```
-When the network is no longer needed you can disconnect from the network:
-```C++
-meshApi->disconnect();
+    if (mesh.connect()) {
+        printf("Connection failed!\r\n");
+        return -1;
+    }
+
+    printf("connected. IP = %s\r\n", mesh.get_ip_address());
 ```
 
 ## Usage example for 6LoWPAN Thread mode
 
-Create a callback function to get the network status:
+Basically the same, but network interface uses different class:
 ```
-void mesh_api_callback(mesh_connection_status_t mesh_status)
-{
-    network_state = mesh_status;
-}
+ThreadInterface mesh;
+mesh.connect();
 ```
-Create a MeshThread class:
-```C++
-MeshThread *meshApi = (MeshThread*)MeshInterfaceFactory::createInterface(MESH_TYPE_THREAD);
-```
-Initialize the object with a registered RF device ID, callback, RF device MAC address and private shared key:
-```
-uint8_t eui64[8];
-int8_t rf_device = rf_device_register();
-rf_read_mac_address(eui64);
-status = meshApi->init(rf_device, mesh_network_callback, eui64);
-```
-Connect to the mesh network:
-```C++
-meshApi->connect();
-```
-Wait for the callback to be called and when successfully connected to the mesh network, create a socket and 
-start communication with the remote end:
-```
-if (network_state == MESH_CONNECTED) {
-    UDPaSocket s(SOCKET_STACK_NANOSTACK_IPV6);
-    s.open(SOCKET_AF_INET6);
-	/* start communication */
-	s.send_to(data, dlen, addr, port);
-}
-
-```
-When the network is no longer needed you can disconnect from the network:
-```C++
-meshApi->disconnect();
-```
-
-## Testing
-The test application is located in `./test/system_test`.
-
-Use the same setup as in the example application. 
-
-Compile the test:
-```
-yt target frdm-k64f-gcc
-yt build
-```
-1. Flash the software to the FRDM-K64F board.
-2. Start the serial terminal emulator.
-3. Press the **Reset** button on the board.
-4. Check the test results in the traces.
-
